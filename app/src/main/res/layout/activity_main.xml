@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/layoutBackground"
+    android:padding="@dimen/layout_padding"
+    android:paddingTop="@dimen/layout_padding_top"
+    tools:context=".views.MainActivity">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/menu_card_menu"
+        android:layout_margin="@dimen/menu_margin"
+        android:onClick="searchCommunityWorker"
+        android:id="@+id/communityWorkeMenu"
+        app:layout_constraintTop_toTopOf="parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="10dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/menu_image_width"
+                android:src="@drawable/iras"
+                android:layout_gravity="center"
+                android:layout_height="@dimen/menu_image_height"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/community_health_worker"
+                android:layout_gravity="center"
+                android:textSize="@dimen/menu_text_size"
+                android:paddingLeft="@dimen/menu_item_padding"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/menu_card_menu"
+        android:layout_margin="@dimen/menu_margin"
+        android:onClick="searchMinistryWorker"
+        android:id="@+id/ministryWorkeMenu"
+        app:layout_constraintTop_toBottomOf="@id/communityWorkeMenu"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="10dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/menu_image_width"
+                android:src="@drawable/iras"
+                android:layout_gravity="center"
+                android:layout_height="@dimen/menu_image_height"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/ministry_health_worker"
+                android:layout_gravity="center"
+                android:textSize="@dimen/menu_text_size"
+                android:paddingLeft="@dimen/menu_item_padding"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
