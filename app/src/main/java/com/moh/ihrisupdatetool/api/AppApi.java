@@ -6,6 +6,7 @@ import com.moh.ihrisupdatetool.dto.AppResponse;
 import org.json.JSONObject;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Url;
@@ -16,5 +17,5 @@ public interface AppApi {
     Call<Object> get(@Url String url);
 
     @POST
-    Call<Object> post(@Url String url, Object data);
+    Call<Object> post(@Url String url,@Body Object data);
 }

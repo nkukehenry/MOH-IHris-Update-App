@@ -3,6 +3,11 @@ package com.moh.ihrisupdatetool.db.entities;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import com.moh.ihrisupdatetool.db.typeconverters.MapConverter;
+
+import java.util.Map;
 
 @Entity(tableName = "form_fields")
 public class FormField {
@@ -14,6 +19,8 @@ public class FormField {
     private String form_field;
     private String display;
     private String label;
+
+    //@TypeConverters(MapConverter.class)
     private String default_data;
     private String data_type;
 
@@ -58,6 +65,14 @@ public class FormField {
         this.label = label;
     }
 
+    public String getData_type() {
+        return data_type;
+    }
+
+    public void setData_type(String data_type) {
+        this.data_type = data_type;
+    }
+
     public String getDefault_data() {
         return default_data;
     }
@@ -66,11 +81,16 @@ public class FormField {
         this.default_data = default_data;
     }
 
-    public String getData_type() {
-        return data_type;
-    }
-
-    public void setData_type(String data_type) {
-        this.data_type = data_type;
+    @Override
+    public String toString() {
+        return "FormField{" +
+                "id='" + id + '\'' +
+                ", form_id='" + form_id + '\'' +
+                ", form_field='" + form_field + '\'' +
+                ", display='" + display + '\'' +
+                ", label='" + label + '\'' +
+                ", default_data='" + default_data + '\'' +
+                ", data_type='" + data_type + '\'' +
+                '}';
     }
 }

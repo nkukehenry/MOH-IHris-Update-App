@@ -13,6 +13,8 @@ public class AppConstants {
     public static String GET_FORMS_URL() { return String.format("%s%s",BASE_URL,"forms"); }
     public static String GET_FORM_FIELDS_URL(Integer formId) { return String.format("%s%s%s",BASE_URL,"fields/",formId); }
 
+    public static String POST_FORM_DATA_URL() { return String.format("%s%s",BASE_URL,"create"); }
+
     public static String GET_MINISTRY_WORKER_DATA_URL() { return  String.format("%s%s",BASE_URL3,"hwdata");}
     public static String GET_COMMUNITY_WORKER_DATA_URL() { return String.format("%s%s",BASE_URL2,"chwdata");}
 
