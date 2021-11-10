@@ -61,6 +61,7 @@ public class CommunityWorkerRepository {
     }
 
     private void  cacheWorkers(List<CommunityWorkerEntity> workers){
+        System.out.println(workers);
         new CommunityWorkerRepository.InsetAsyncTask(communitWorkerDao).execute(workers);
     }
 

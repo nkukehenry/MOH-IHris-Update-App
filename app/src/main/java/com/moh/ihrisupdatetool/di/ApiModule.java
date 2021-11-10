@@ -1,8 +1,12 @@
 package com.moh.ihrisupdatetool.di;
 
+import android.app.Application;
+import android.app.ProgressDialog;
+
 import com.moh.ihrisupdatetool.api.AppApi;
 import com.moh.ihrisupdatetool.repo.remote.GenericAppRepository;
 import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
+import com.moh.ihrisupdatetool.services.IApiErrorHandlingService;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,13 +43,15 @@ public class ApiModule {
 
     @Singleton
     @Provides
-    public static Interceptor provideErrorHandlingInterceptor() {
+    public static Interceptor provideErrorHandlingInterceptor(IApiErrorHandlingService apiErrorHandler) {
 
         return new Interceptor()  {
             @Override
             public Response intercept(Chain chain) throws IOException {
 
                 Request request = chain.request();
+
+                apiErrorHandler.showNetworkRequestLoader();
 
                 //get them from header service if needed
                 Map<String, String > headers= new HashMap<>();
@@ -56,6 +62,10 @@ public class ApiModule {
                  }
 
                 Response response = chain.proceed(requestBuilder.build());
+
+                apiErrorHandler.closeNetworkRequestLoader();
+
+
                 return response;
             }
         };
@@ -107,6 +117,15 @@ public class ApiModule {
     @Provides
     public IGenericAppRepository providesGenericAppRepository(AppApi appApi){
         return new GenericAppRepository(appApi);
+    }
+
+    @Singleton
+    @Provides
+    public static ProgressDialog provideProgressDialog(Application application) {
+
+        final ProgressDialog loader = new ProgressDialog(application.getApplicationContext());
+        loader.setMessage("Loading...");
+        return loader;
     }
 
 

@@ -8,8 +8,6 @@
     android:background="@color/layoutBackground"
     tools:context=".views.FormsActivity">
 
-
-
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:id="@+id/formsRecycler"

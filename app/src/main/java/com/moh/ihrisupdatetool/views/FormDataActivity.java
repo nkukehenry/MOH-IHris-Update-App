@@ -1,29 +1,33 @@
 package com.moh.ihrisupdatetool.views;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.InputType;
+import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.adapters.AdapterViewBindingAdapter;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.R;
 import com.moh.ihrisupdatetool.db.entities.FormEntity;
@@ -32,11 +36,13 @@ import com.moh.ihrisupdatetool.dto.FormFieldType;
 import com.moh.ihrisupdatetool.viewmodels.FormsViewModel;
 import com.moh.ihrisupdatetool.viewmodels.SubmissionViewModel;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -52,6 +58,8 @@ public class FormDataActivity extends AppCompatActivity {
     SubmissionViewModel submissionViewModel;
     List<FormField> formFields;
     Button submitBtn;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    FormField currentImageField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,22 +90,31 @@ public class FormDataActivity extends AppCompatActivity {
 
             formFields = formsFieldsResponse;
 
-            for(FormField field : formsFieldsResponse){
+            try {
+                submitBtn.setEnabled(true);
 
-                FormFieldType fieldType = InputType(field.getData_type());
+                for (FormField field : formsFieldsResponse) {
 
-                switch(fieldType) {
-                    case SPINNER_BASED_FIED:
-                        renderSpinnerBasedField(field);
-                        break;
-                    default:
-                        renderTextBasedField(field);
-                        break;
+                    FormFieldType fieldType = InputType(field.getData_type());
+
+                    switch (fieldType) {
+                        case SPINNER_BASED_FIELD:
+                            renderSpinnerBasedField(field);
+                            break;
+                        case IMAGE_FIELD:
+                            renderImageField(field);
+                            break;
+                        default:
+                            renderTextBasedField(field);
+                            break;
+                    }
                 }
+
+            }catch (Exception ex){
+                ex.printStackTrace();
             }
 
         });
-
 
         //submission
         submissionViewModel.observeResonse().observe( this,submissionResponse->{
@@ -125,7 +142,7 @@ public class FormDataActivity extends AppCompatActivity {
         //Input
         final EditText edtPass = new EditText(currentField.getContext());
         edtPass.setInputType( getInputTypeClass(field.getData_type()) );
-        edtPass.setPadding(25,50,25,10);
+        edtPass.setPadding(25,100,25,10);
         edtPass.setTextColor(getResources().getColor(R.color.grey));
         edtPass.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         edtPass.setHint(field.getLabel());
@@ -135,6 +152,59 @@ public class FormDataActivity extends AppCompatActivity {
         currentField.addView(edtPass);
 
         dynamicFieldsWrapper.addView(currentField);
+    }
+
+    private void renderImageField(FormField field){
+
+        // Create EditText
+        TextInputLayout currentField =new TextInputLayout(this);
+
+        //Params
+        TextInputLayout.LayoutParams params= new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.topMargin =8;
+        params.bottomMargin=8;
+
+        currentField.setLayoutParams(params);
+
+        //Input
+        final TextView imageHolder = new TextView(currentField.getContext());
+
+        imageHolder.setPadding(25,25,25,25);
+        imageHolder.setTextColor(getResources().getColor(R.color.grey));
+        imageHolder.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        imageHolder.setBackgroundColor(0x00000000);
+        imageHolder.setId(Integer.parseInt(field.getId()));
+        imageHolder.setText("Choose "+field.getLabel());
+
+        imageHolder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                dispatchTakePictureIntent(field);
+            }
+        });
+
+        ImageView imageView= new ImageView(currentField.getContext());
+        imageView.setId(Integer.parseInt(field.getId())*300);
+        imageView.setVisibility(View.GONE);
+        imageView.setLayoutParams( new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        imageView.setPadding(10,30,10,10);
+
+        currentField.addView(imageHolder);
+        currentField.addView(imageView);
+
+        dynamicFieldsWrapper.addView(currentField);
+    }
+
+    private void dispatchTakePictureIntent(FormField field) {
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            this.currentImageField = field;
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        } catch (ActivityNotFoundException e) {
+            // display error state to the user
+        }
     }
 
 
@@ -149,6 +219,11 @@ public class FormDataActivity extends AppCompatActivity {
 
         List<String> listOptions = new ArrayList<String>();
 
+        /**
+         * Extract fields , get there values (key->value)
+         * Consider value in position 1 for if there values are >1 in count
+         * Else take position 0 if values count ==1
+         */
         if(options != null){
 
             for (Map<String, String> option : options) {
@@ -180,22 +255,29 @@ public class FormDataActivity extends AppCompatActivity {
         currentField.setLayoutParams(params);
 
         spinnerOptions.add("Choose "+field.getLabel());
-
+        //Create spinner
         Spinner spinner = new Spinner(FormDataActivity.this);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(FormDataActivity.this,android.R.layout.simple_spinner_item,spinnerOptions);
+        //Attach adapter to spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(FormDataActivity.this,R.layout.spinner_item,spinnerOptions);
         spinner.setAdapter(adapter);
         spinner.setLayoutParams(params);
+
+        /**
+         * Hook a an item selected handler for that particular input
+         */
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println(spinnerOptions.get(position));
-                System.out.println(options.get(position));
+                /**
+                 * Postions should always be less than list size,else outof range
+                 */
+                if( position < options.size()) {
 
-                postDataObject.addProperty(field.getForm_field(),spinnerOptions.get(position));
-
+                    System.out.println(spinnerOptions.get(position));
+                    System.out.println(options.get(position));
+                    postDataObject.addProperty(field.getForm_field(), spinnerOptions.get(position));
+                }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -206,12 +288,9 @@ public class FormDataActivity extends AppCompatActivity {
         dynamicFieldsWrapper.addView(currentField);
     }
 
-
-
-
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, FormsActivity.class);
         startActivity(intent);
         finish();
     }
@@ -243,8 +322,10 @@ public class FormDataActivity extends AppCompatActivity {
             case "date":
             case "email":
                 return FormFieldType.TEXT_BASED_FIELD;
+            case "blob":
+                return FormFieldType.IMAGE_FIELD;
             case "map":
-                return FormFieldType.SPINNER_BASED_FIED;
+                return FormFieldType.SPINNER_BASED_FIELD;
         }
         return FormFieldType.TEXT_BASED_FIELD;
     }
@@ -264,5 +345,56 @@ public class FormDataActivity extends AppCompatActivity {
 
         submissionViewModel.postData(postDataObject);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+
+
+            Bundle bundle =  data.getExtras();
+
+            System.out.println(data.getData());
+            System.out.println(bundle.get("data"));
+            System.out.println(bundle.get("uri"));
+
+            // final Uri imageUri = (Uri) bundle.get("data");
+
+            InputStream imageStream = null;
+
+            try {
+
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+
+                ImageView imageView = findViewById(Integer.parseInt(currentImageField.getId())*300);
+                imageView.setImageBitmap(photo);
+                imageView.setVisibility(View.VISIBLE);
+
+                String encodedImage = toBase64(photo);
+                postDataObject.addProperty(currentImageField.getForm_field(),encodedImage);
+                TextView imageLabel = findViewById(Integer.parseInt(currentImageField.getId()));
+                imageLabel.setText(currentImageField.getLabel() + ": Attached Successfully");
+
+                currentImageField = null;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }
+    }
+
+    public String toBase64(Bitmap bm) {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
+        byte[] b = baos.toByteArray();
+
+        return Base64.encodeToString(b, Base64.NO_WRAP);
+    }
+
 
 }

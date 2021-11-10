@@ -4,6 +4,7 @@ import androidx.room.Database;
 import androidx.room.RoomDatabase;
 
 import com.moh.ihrisupdatetool.db.dao.CommunityWorkerDao;
+import com.moh.ihrisupdatetool.db.dao.DataEntryDao;
 import com.moh.ihrisupdatetool.db.dao.DistrictsDao;
 import com.moh.ihrisupdatetool.db.dao.FacilitiesDao;
 import com.moh.ihrisupdatetool.db.dao.FormFieldsDao;
@@ -11,6 +12,7 @@ import com.moh.ihrisupdatetool.db.dao.FormsDao;
 import com.moh.ihrisupdatetool.db.dao.JobsDao;
 import com.moh.ihrisupdatetool.db.dao.MinistryWorkerDao;
 import com.moh.ihrisupdatetool.db.entities.CommunityWorkerEntity;
+import com.moh.ihrisupdatetool.db.entities.DataEntryTemplate;
 import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
 import com.moh.ihrisupdatetool.db.entities.FacilityEntity;
 import com.moh.ihrisupdatetool.db.entities.FormEntity;
@@ -26,7 +28,8 @@ import com.moh.ihrisupdatetool.db.entities.MinistryWorkerEntity;
         ,MinistryWorkerEntity.class
         ,FormEntity.class
         , FormField.class
-     }, version = 10,exportSchema = false)
+        , DataEntryTemplate.class
+     }, version = 11,exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract FacilitiesDao facilitiesDao();
@@ -36,4 +39,5 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CommunityWorkerDao communityWorkerDao();
     public abstract FormsDao formsDao();
     public abstract  FormFieldsDao formFieldsDao();
+    public abstract DataEntryDao dataEntryDao();
 }

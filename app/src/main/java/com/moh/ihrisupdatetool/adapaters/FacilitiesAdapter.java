@@ -13,6 +13,7 @@ import com.moh.ihrisupdatetool.databinding.FacilityListBinding;
 import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
 import com.moh.ihrisupdatetool.db.entities.FacilityEntity;
 import com.moh.ihrisupdatetool.views.FormsActivity;
+import com.moh.ihrisupdatetool.views.PersonSearchActivity;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -69,7 +70,7 @@ public class FacilitiesAdapter extends RecyclerView.Adapter<FacilitiesAdapter.Fa
 
         @Override
         public void onClick(View v) {
-            Intent intent = new Intent(v.getContext(), FormsActivity.class);
+            Intent intent = new Intent(v.getContext(), PersonSearchActivity.class);
             //intent.putExtra(SELECTED_FACILITY, this.districtListBinding.getFacility());
             v.getContext().startActivity(intent);
         }

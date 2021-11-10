@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import com.moh.ihrisupdatetool.db.entities.CommunityWorkerEntity;
+import com.moh.ihrisupdatetool.db.entities.MinistryWorkerEntity;
 import com.moh.ihrisupdatetool.repo.CommunityWorkerRepository;
 
 import org.jetbrains.annotations.NotNull;
@@ -26,10 +27,6 @@ public class WorkersViewModel extends AndroidViewModel {
     public WorkersViewModel(@NonNull @NotNull Application application, CommunityWorkerRepository communityWorkerRepository) {
         super(application);
         this.communityWorkerRepository = communityWorkerRepository;
-    }
-
-    public MutableLiveData<List<CommunityWorkerEntity>> observerResponse(){
-        return communityWorkerRepository.observerResponse();
     }
 
     public void getHealthWorkers(){

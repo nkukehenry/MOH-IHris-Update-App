@@ -25,7 +25,7 @@
 
             <ImageView
                 android:layout_width="@dimen/menu_image_width"
-                android:src="@drawable/iras"
+                android:src="@drawable/comm_worker"
                 android:layout_gravity="center"
                 android:layout_height="@dimen/menu_image_height"/>
 
@@ -57,7 +57,7 @@
 
             <ImageView
                 android:layout_width="@dimen/menu_image_width"
-                android:src="@drawable/iras"
+                android:src="@drawable/min_worker"
                 android:layout_gravity="center"
                 android:layout_height="@dimen/menu_image_height"/>
 

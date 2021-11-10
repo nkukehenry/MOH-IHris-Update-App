@@ -6,6 +6,7 @@ import androidx.room.Room;
 
 import com.moh.ihrisupdatetool.db.AppDatabase;
 import com.moh.ihrisupdatetool.db.dao.CommunityWorkerDao;
+import com.moh.ihrisupdatetool.db.dao.DataEntryDao;
 import com.moh.ihrisupdatetool.db.dao.DistrictsDao;
 import com.moh.ihrisupdatetool.db.dao.FacilitiesDao;
 import com.moh.ihrisupdatetool.db.dao.FormFieldsDao;
@@ -73,6 +74,13 @@ public class DataBaseModule {
     @Singleton
     public static FormFieldsDao formFieldsDao(AppDatabase appDatabase){
         return appDatabase.formFieldsDao();
+    }
+
+
+    @Provides
+    @Singleton
+    public static DataEntryDao dataEntryDao(AppDatabase appDatabase){
+        return appDatabase.dataEntryDao();
     }
 
 

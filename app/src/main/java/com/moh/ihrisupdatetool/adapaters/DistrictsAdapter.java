@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.moh.ihrisupdatetool.databinding.DistrictListBinding;
 import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
 import com.moh.ihrisupdatetool.views.FormsActivity;
+import com.moh.ihrisupdatetool.views.PersonSearchActivity;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +68,7 @@ public class DistrictsAdapter extends RecyclerView.Adapter<DistrictsAdapter.Dist
 
         @Override
         public void onClick(View v) {
-            Intent intent = new Intent(v.getContext(), FormsActivity.class);
+            Intent intent = new Intent(v.getContext(), PersonSearchActivity.class);
             //intent.putExtra(SELECTED_DISTRICT, this.districtListBinding.getDistrict());
            v.getContext().startActivity(intent);
         }
