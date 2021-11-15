@@ -27,9 +27,9 @@ import com.moh.ihrisupdatetool.db.entities.MinistryWorkerEntity;
         ,CommunityWorkerEntity.class
         ,MinistryWorkerEntity.class
         ,FormEntity.class
-        , FormField.class
-        , DataEntryTemplate.class
-     }, version = 11,exportSchema = false)
+        ,FormField.class
+        ,DataEntryTemplate.class
+     }, version = 14,exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract FacilitiesDao facilitiesDao();

@@ -15,5 +15,4 @@ public abstract class ServiceBindingModule {
     @Binds
     abstract IApiErrorHandlingService bindApiErrorHandlingService (ApiErrorHandlingService apiErrorHandlingService);
 
-
 }

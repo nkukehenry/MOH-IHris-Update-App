@@ -5,9 +5,7 @@ import android.os.AsyncTask;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.reflect.TypeToken;
-import com.moh.ihrisupdatetool.db.dao.DistrictsDao;
 import com.moh.ihrisupdatetool.db.dao.JobsDao;
-import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
 import com.moh.ihrisupdatetool.db.entities.JobEntity;
 import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
@@ -57,7 +55,7 @@ public class JobsRepository {
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<JobEntity>>() {}.getType();
-                List<JobEntity> response = AppUtils.ToBaseType(o,genType);
+                List<JobEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheJobs(response);
                 this.jobsResponse.postValue(response);

@@ -33,4 +33,13 @@ public class SubmissionViewModel extends AndroidViewModel {
     public void postData(JsonObject postData){
          dataSubmissionRepository.postData(postData);
     }
+
+    public void cacheData(JsonObject postData){
+        dataSubmissionRepository.cacheFormData(postData,false);
+    }
+
+    public Boolean syncData(){
+        return dataSubmissionRepository.syncData();
+    }
+
 }

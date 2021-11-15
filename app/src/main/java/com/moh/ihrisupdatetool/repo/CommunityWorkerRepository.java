@@ -46,13 +46,26 @@ public class CommunityWorkerRepository {
 
     }
 
+    public void searchWorkers(String term,String districtName){
+
+        communitWorkerDao.searchWorker(term,districtName).observeForever(o->{
+            if(o.isEmpty()){
+                  fetchFromApi();
+                 } else {
+                this.communityWorkerResponse.postValue(o);
+            }
+        });
+
+    }
+
+
     private void  fetchFromApi(){
         genericAppRepository.get(AppConstants.GET_COMMUNITY_WORKER_DATA_URL()).observeForever(o -> {
             System.out.println(o);
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<CommunityWorkerEntity>>() {}.getType();
-                List<CommunityWorkerEntity> response = AppUtils.ToBaseType(o,genType);
+                List<CommunityWorkerEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheWorkers(response);
                 this.communityWorkerResponse.postValue(response);

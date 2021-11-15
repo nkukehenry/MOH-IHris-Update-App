@@ -42,7 +42,7 @@ public class GenericAppRepository implements IGenericAppRepository {
                 Type genType = new TypeToken<T>() {}.getType();
                 assert response.body() != null;
 
-                T results = AppUtils.ToBaseType(response.body(),genType);
+                T results = AppUtils.objectToType(response.body(),genType);
                 data.postValue(results);
 
             }
@@ -74,7 +74,7 @@ public class GenericAppRepository implements IGenericAppRepository {
                 Type genType = new TypeToken<T>() {}.getType();
                 assert response.body() != null;
 
-                T results = AppUtils.ToBaseType(response.body(),genType);
+                T results = AppUtils.objectToType(response.body(),genType);
                 data.postValue(results);
             }
 

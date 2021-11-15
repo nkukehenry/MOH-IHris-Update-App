@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.moh.ihrisupdatetool.databinding.FacilityListBinding;
 import com.moh.ihrisupdatetool.databinding.FormsListBinding;
 import com.moh.ihrisupdatetool.db.entities.FormEntity;
+import com.moh.ihrisupdatetool.utils.AppData;
 import com.moh.ihrisupdatetool.views.FormDataActivity;
 
 import org.jetbrains.annotations.NotNull;
@@ -73,6 +74,8 @@ public class FormsAdapter extends RecyclerView.Adapter<FormsAdapter.FormViewHold
         public void onClick(View v) {
             Intent intent = new Intent(v.getContext(), FormDataActivity.class);
             intent.putExtra(SELECTED_FORM, this.formsListBinding.getForm());
+
+            AppData.selectedForm = this.formsListBinding.getForm();
             v.getContext().startActivity(intent);
         }
     }

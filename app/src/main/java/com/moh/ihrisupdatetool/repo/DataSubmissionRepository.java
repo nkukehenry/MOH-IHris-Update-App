@@ -2,14 +2,15 @@ package com.moh.ihrisupdatetool.repo;
 
 import android.os.AsyncTask;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.DataEntryDao;
 import com.moh.ihrisupdatetool.db.dao.FormFieldsDao;
 import com.moh.ihrisupdatetool.db.entities.DataEntryTemplate;
-import com.moh.ihrisupdatetool.db.entities.FormField;
 import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
@@ -26,8 +27,7 @@ public class DataSubmissionRepository {
     private DataEntryDao dataEntryDao;
 
     @Inject
-    public DataSubmissionRepository(IGenericAppRepository genericAppRepository,
-                                    FormFieldsDao  formsDao,DataEntryDao dataEntryDao) {
+    public DataSubmissionRepository(IGenericAppRepository genericAppRepository,FormFieldsDao  formsDao,DataEntryDao dataEntryDao) {
 
         this.genericAppRepository = genericAppRepository;
         this.submissionResponse = new MutableLiveData<>();
@@ -39,6 +39,26 @@ public class DataSubmissionRepository {
         return submissionResponse;
     }
 
+    public Boolean syncData(){
+
+        dataEntryDao.getLocalRecords().observeForever(new Observer<List<DataEntryTemplate>>() {
+            @Override
+            public void onChanged(List<DataEntryTemplate> records) {
+
+                   JsonObject resp = new JsonObject();
+                    if( !records.isEmpty() ) {
+                        for (DataEntryTemplate record :records) {
+                            postData(record.getFormdata());
+                            resp.addProperty("state",true);
+                        }
+                    }else{
+                        resp.addProperty("state",false);
+                    }
+                submissionResponse.postValue(resp);
+            }
+        });
+        return true;
+    }
 
     public void  postData(JsonObject postData){
 
@@ -51,21 +71,23 @@ public class DataSubmissionRepository {
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<JsonObject>() {}.getType();
-                JsonObject response = AppUtils.ToBaseType(o,genType);
+                JsonObject response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 this.submissionResponse.postValue(response);
+                //set marked uploaded
+                cacheFormData(postData,true);
             }
 
         });
     }
 
 
-    private void  cacheFormData(JsonObject data,Boolean isUploaded){
+    public void  cacheFormData(JsonObject data,Boolean isUploaded){
 
         DataEntryTemplate dataEntryTemplate = new DataEntryTemplate();
         dataEntryTemplate.setFacility_id("9988898");
         dataEntryTemplate.setFormdata(data);
-        dataEntryTemplate.setReference("0998988878787");
+        dataEntryTemplate.setReference(data.get("reference").getAsString());
         dataEntryTemplate.setStatus((isUploaded)?1:0);
 
         new DataSubmissionRepository.InsetAsyncTask(dataEntryDao).execute(dataEntryTemplate);

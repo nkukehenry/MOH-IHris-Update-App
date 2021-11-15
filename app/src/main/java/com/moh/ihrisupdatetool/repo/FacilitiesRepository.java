@@ -52,7 +52,7 @@ public class FacilitiesRepository {
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<FacilityEntity>>() {}.getType();
-                List<FacilityEntity> response = AppUtils.ToBaseType(o,genType);
+                List<FacilityEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheFacilities(response);
                 this.facilitiesResponse.postValue(response);

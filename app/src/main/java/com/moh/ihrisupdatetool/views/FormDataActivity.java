@@ -2,15 +2,9 @@ package com.moh.ihrisupdatetool.views;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.InputType;
-import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -27,18 +21,21 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.R;
+import com.moh.ihrisupdatetool.db.entities.CommunityWorkerEntity;
 import com.moh.ihrisupdatetool.db.entities.FormEntity;
 import com.moh.ihrisupdatetool.db.entities.FormField;
+import com.moh.ihrisupdatetool.db.entities.MinistryWorkerEntity;
 import com.moh.ihrisupdatetool.dto.FormFieldType;
+import com.moh.ihrisupdatetool.utils.AppData;
+import com.moh.ihrisupdatetool.utils.AppUtils;
+import com.moh.ihrisupdatetool.utils.UIHelper;
 import com.moh.ihrisupdatetool.viewmodels.FormsViewModel;
 import com.moh.ihrisupdatetool.viewmodels.SubmissionViewModel;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,25 +48,46 @@ import static com.moh.ihrisupdatetool.utils.AppConstants.SELECTED_FORM;
 @AndroidEntryPoint
 public class FormDataActivity extends AppCompatActivity {
 
-    FormsViewModel formsViewModel;
-    FormEntity selectedForm;
-    LinearLayout dynamicFieldsWrapper;
-    JsonObject postDataObject = new JsonObject();
-    SubmissionViewModel submissionViewModel;
-    List<FormField> formFields;
-    Button submitBtn;
+    private FormsViewModel formsViewModel;
+    private FormEntity selectedForm;
+    private LinearLayout dynamicFieldsWrapper,formNavigator;
+    private JsonObject postDataObject;
+    private SubmissionViewModel submissionViewModel;
+    private List<FormField> formFields;
+    private Button submitBtn,nextFormButton,prevFormButton;
     static final int REQUEST_IMAGE_CAPTURE = 1;
-    FormField currentImageField;
+    private FormField currentImageField;
+    private Boolean hasNextForm = true,hasPrevForm = true;
+    private UIHelper uiHelper;
+    private TextView formTitle;
+    private CommunityWorkerEntity selectedCommWorker;
+    private MinistryWorkerEntity selectedMinWorker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        uiHelper = new UIHelper(this);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_fields);
 
+        postDataObject = new JsonObject();
+        postDataObject.addProperty("reference",AppUtils.getRandomString(12));
+
+        nextFormButton = findViewById(R.id.nextFormBtn);
+        prevFormButton = findViewById(R.id.previousFormBtn);
+        formNavigator = findViewById(R.id.formNavigator);
         dynamicFieldsWrapper  = findViewById(R.id.dynamicFieldsWrapper);
+        formTitle = findViewById(R.id.formTitle);
+        prevFormButton.setEnabled(false);
 
         Bundle bundle; bundle = getIntent().getExtras();
         selectedForm   = (FormEntity) bundle.get(SELECTED_FORM);
+
+        selectedCommWorker = AppData.selectedCommunityWorker;
+        selectedMinWorker  = AppData.selectedMinistryWorker;
+
+        prefillIndividulValues();
 
         formsViewModel = new ViewModelProvider(this).get(FormsViewModel.class);
         submissionViewModel =  new ViewModelProvider(this).get(SubmissionViewModel.class);
@@ -80,22 +98,44 @@ public class FormDataActivity extends AppCompatActivity {
         });
 
         initObservers();
-
         getFormFields();
+
+    }
+
+    private void prefillIndividulValues(){
+
+        if(selectedCommWorker!=null){
+
+            postDataObject.addProperty("surname",selectedCommWorker.getSurname());
+            postDataObject.addProperty("othername",selectedCommWorker.getOthername());
+            postDataObject.addProperty("firstname",selectedCommWorker.getFirstname());
+            postDataObject.addProperty("ihris_pid",selectedCommWorker.getPersonId());
+            postDataObject.addProperty("primary_mobile_number",selectedCommWorker.getMobile());
+        }
+        else if(selectedMinWorker!=null){
+            postDataObject.addProperty("surname",selectedMinWorker.getSurname());
+            postDataObject.addProperty("othername",selectedMinWorker.getOthername());
+            postDataObject.addProperty("firstname",selectedMinWorker.getFirstname());
+            postDataObject.addProperty("ihris_pid",selectedMinWorker.getPersonId());
+            postDataObject.addProperty("primary_mobile_number",selectedMinWorker.getPhone());
+        }
+
     }
 
     private void initObservers(){
 
         formsViewModel.observerFormFieldsResponse().observe(this, formsFieldsResponse -> {
 
+            uiHelper.hideLoader();
+            dynamicFieldsWrapper.removeAllViews();
             formFields = formsFieldsResponse;
+            submitBtn.setEnabled(false);
+            formTitle.setText(selectedForm.getForm_title());
 
             try {
-                submitBtn.setEnabled(true);
-
                 for (FormField field : formsFieldsResponse) {
 
-                    FormFieldType fieldType = InputType(field.getData_type());
+                    FormFieldType fieldType = AppUtils.InputType(field.getData_type());
 
                     switch (fieldType) {
                         case SPINNER_BASED_FIELD:
@@ -118,14 +158,24 @@ public class FormDataActivity extends AppCompatActivity {
 
         //submission
         submissionViewModel.observeResonse().observe( this,submissionResponse->{
-            System.out.println(submissionResponse);
+           try {
+               uiHelper.hideLoader();
+               uiHelper.showDialog("Entry finished successfully");
+           }catch (Exception ex){
+                ex.printStackTrace();
+           }finally {
+               Intent intent = new Intent(this, MainActivity.class);
+               startActivity(intent);
+               finish();
+           }
+
         });
     }
 
     private void getFormFields() {
+        uiHelper.showLoader();
         formsViewModel.getFormFields(selectedForm.getId());
     }
-
 
     private void renderTextBasedField(FormField field){
 
@@ -141,13 +191,20 @@ public class FormDataActivity extends AppCompatActivity {
 
         //Input
         final EditText edtPass = new EditText(currentField.getContext());
-        edtPass.setInputType( getInputTypeClass(field.getData_type()) );
+        edtPass.setInputType( AppUtils.getInputTypeClass(field.getData_type()) );
         edtPass.setPadding(25,100,25,10);
         edtPass.setTextColor(getResources().getColor(R.color.grey));
         edtPass.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         edtPass.setHint(field.getLabel());
         edtPass.setBackgroundColor(0x00000000);
         edtPass.setId(Integer.parseInt(field.getId()));
+
+        JsonElement element = postDataObject.get(field.getForm_field());
+
+        if( element !=null) {
+            String elemValue = element.getAsString();
+            edtPass.setText(elemValue.toString());
+        }
 
         currentField.addView(edtPass);
 
@@ -157,7 +214,7 @@ public class FormDataActivity extends AppCompatActivity {
     private void renderImageField(FormField field){
 
         // Create EditText
-        TextInputLayout currentField =new TextInputLayout(this);
+        TextInputLayout currentField = new TextInputLayout(this);
 
         //Params
         TextInputLayout.LayoutParams params= new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -206,7 +263,6 @@ public class FormDataActivity extends AppCompatActivity {
             // display error state to the user
         }
     }
-
 
     private void renderSpinnerBasedField(FormField field){
 
@@ -288,62 +344,27 @@ public class FormDataActivity extends AppCompatActivity {
         dynamicFieldsWrapper.addView(currentField);
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(this, FormsActivity.class);
-        startActivity(intent);
-        finish();
-    }
+    private void preparePostData(){
 
-    private int getInputTypeClass(String remoteType){
+        try {
+            for (FormField field : formFields) {
 
-        switch (remoteType){
-            case "date":
-                return InputType.TYPE_CLASS_DATETIME;
-            case "number":
-                return InputType.TYPE_CLASS_NUMBER;
-            case "decimal":
-                return InputType.TYPE_NUMBER_FLAG_DECIMAL;
-            case "phone":
-                return InputType.TYPE_CLASS_PHONE;
-            case "email":
-                return InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
-            default:
-                return InputType.TYPE_CLASS_TEXT;
-        }
-    }
+                FormFieldType fieldType = AppUtils.InputType(field.getData_type());
 
-    private FormFieldType InputType(String fieldType){
+                if (fieldType.equals(FormFieldType.TEXT_BASED_FIELD)) {
+                    EditText textInput = findViewById(Integer.parseInt(field.getId()));
+                    postDataObject.addProperty(field.getForm_field(), textInput.getText().toString());
+                }
 
-        switch (fieldType){
-            case "phone":
-            case "decimal":
-            case "number":
-            case "date":
-            case "email":
-                return FormFieldType.TEXT_BASED_FIELD;
-            case "blob":
-                return FormFieldType.IMAGE_FIELD;
-            case "map":
-                return FormFieldType.SPINNER_BASED_FIELD;
-        }
-        return FormFieldType.TEXT_BASED_FIELD;
-    }
-
-    private void onSubmitClicked() {
-
-        for (FormField field : formFields) {
-
-            FormFieldType fieldType = InputType(field.getData_type());
-
-            if (fieldType.equals(FormFieldType.TEXT_BASED_FIELD)) {
-                EditText textInput = findViewById(Integer.parseInt(field.getId()));
-                postDataObject.addProperty(field.getForm_field(), textInput.getText().toString());
             }
-
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
+    }
 
-        submissionViewModel.postData(postDataObject);
+    private void cacheData(){
+        preparePostData();
+        submissionViewModel.cacheData(postDataObject);
     }
 
     @Override
@@ -353,17 +374,6 @@ public class FormDataActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
 
-
-            Bundle bundle =  data.getExtras();
-
-            System.out.println(data.getData());
-            System.out.println(bundle.get("data"));
-            System.out.println(bundle.get("uri"));
-
-            // final Uri imageUri = (Uri) bundle.get("data");
-
-            InputStream imageStream = null;
-
             try {
 
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
@@ -372,7 +382,7 @@ public class FormDataActivity extends AppCompatActivity {
                 imageView.setImageBitmap(photo);
                 imageView.setVisibility(View.VISIBLE);
 
-                String encodedImage = toBase64(photo);
+                String encodedImage = AppUtils.bitmapTobase64(photo);
                 postDataObject.addProperty(currentImageField.getForm_field(),encodedImage);
                 TextView imageLabel = findViewById(Integer.parseInt(currentImageField.getId()));
                 imageLabel.setText(currentImageField.getLabel() + ": Attached Successfully");
@@ -387,14 +397,89 @@ public class FormDataActivity extends AppCompatActivity {
         }
     }
 
-    public String toBase64(Bitmap bm) {
+    @Override
+    public void onBackPressed() {
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
-        byte[] b = baos.toByteArray();
-
-        return Base64.encodeToString(b, Base64.NO_WRAP);
+      /*  Intent intent = new Intent(this, FormsActivity.class);
+        startActivity(intent);
+        finish();
+       */
+        uiHelper.showDialog("Please complete this survey before attempting to close");
     }
 
+    private void updateUIOnNavigation(){
 
+        List<FormEntity> forms = AppData.allForms;
+        int currentFormIndex = forms.indexOf(selectedForm);
+
+        //submit enabled on last one
+        if(currentFormIndex == (forms.size() -1) ) {
+            submitBtn.setEnabled(true);
+        }else{
+            submitBtn.setEnabled(false);
+        }
+
+        //Next btn
+        if( hasNextForm){
+            nextFormButton.setEnabled(true);
+        }else{
+            nextFormButton.setEnabled(false);
+        }
+
+        //Previous btn hide/show
+        if(hasPrevForm){
+            prevFormButton.setEnabled(true);
+        }else {
+            prevFormButton.setEnabled(false);
+        }
+
+
+
+    }
+
+    private void onSubmitClicked() {
+        preparePostData();
+        submissionViewModel.postData(postDataObject);
+    }
+
+    public void onNextClick(View view) {
+
+        cacheData();
+
+        List<FormEntity> forms = AppData.allForms;
+        int currentFormIndex = forms.indexOf(selectedForm);
+
+        if(currentFormIndex < (forms.size()-1)) {
+            selectedForm = forms.get(currentFormIndex + 1);
+            hasNextForm  = true;
+            hasPrevForm  = true;
+            getFormFields();
+        }else {
+            hasNextForm = false;
+            hasPrevForm  = true;
+        }
+
+        updateUIOnNavigation();
+    }
+
+    public void onPrevClick(View view) {
+        cacheData();
+
+        List<FormEntity> forms = AppData.allForms;
+        int currentFormIndex = forms.indexOf(selectedForm);
+
+        int index = currentFormIndex - 1;
+
+        if(index > -1) {
+            selectedForm = forms.get(index);
+            hasPrevForm  = true;
+            hasNextForm = true;
+            getFormFields();
+        }else {
+            selectedForm = forms.get(0);
+            hasPrevForm = false;
+            hasNextForm = true;
+        }
+        updateUIOnNavigation();
+    }
 }

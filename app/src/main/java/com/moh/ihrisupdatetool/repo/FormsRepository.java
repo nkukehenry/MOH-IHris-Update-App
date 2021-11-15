@@ -6,9 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.FormsDao;
-import com.moh.ihrisupdatetool.db.dao.JobsDao;
 import com.moh.ihrisupdatetool.db.entities.FormEntity;
-import com.moh.ihrisupdatetool.db.entities.JobEntity;
 import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
@@ -57,7 +55,7 @@ public class FormsRepository {
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<FormEntity>>() {}.getType();
-                List<FormEntity> response = AppUtils.ToBaseType(o,genType);
+                List<FormEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheForms(response);
                 this.formsResponse.postValue(response);

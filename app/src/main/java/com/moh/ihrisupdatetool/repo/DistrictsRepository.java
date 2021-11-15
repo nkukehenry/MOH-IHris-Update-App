@@ -51,7 +51,7 @@ public class DistrictsRepository {
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<DistrictEntity>>() {}.getType();
-                List<DistrictEntity> response = AppUtils.ToBaseType(o,genType);
+                List<DistrictEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheDistricts(response);
                 this.districtsResponse.postValue(response);

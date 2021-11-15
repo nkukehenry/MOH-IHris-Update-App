@@ -54,7 +54,7 @@ public class FormFieldsRepository {
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<FormField>>() {}.getType();
-                List<FormField> response = AppUtils.ToBaseType(o,genType);
+                List<FormField> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheFormFields(response);
                 this.formFieldsResponse.postValue(response);

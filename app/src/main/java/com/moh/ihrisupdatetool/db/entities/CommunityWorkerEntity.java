@@ -2,6 +2,7 @@ package com.moh.ihrisupdatetool.db.entities;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
@@ -23,6 +24,8 @@ public class CommunityWorkerEntity {
     private String dhis2_id;
     private String othername;
     private String mobile;
+    @Ignore
+    private String fullName;
 
     @NonNull
     public String getPersonId() {
@@ -111,6 +114,10 @@ public class CommunityWorkerEntity {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public String getFullName() {
+        return surname+" "+((othername!=null)?othername:"")+" "+firstname;
     }
 
     @Override

@@ -1,0 +1,14 @@
+<shape xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="schemas.android.com/apk/res/android"
+    tools:ignore="NamespaceTypo">
+    <stroke android:width="2dp" android:color="#FFFFFF" />
+<!--    <gradient-->
+<!--        android:angle="180"-->
+<!--        android:endColor="@color/NaranjaOTTAA"-->
+<!--        android:startColor="@color/FondoActionBar" />-->
+    <corners
+        android:bottomLeftRadius="7dp"
+        android:bottomRightRadius="7dp"
+        android:topLeftRadius="7dp"
+        android:topRightRadius="7dp" />
+</shape>

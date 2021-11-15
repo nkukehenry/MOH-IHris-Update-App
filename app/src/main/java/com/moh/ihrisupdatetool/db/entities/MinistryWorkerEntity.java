@@ -9,7 +9,6 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "min_workers")
 public class MinistryWorkerEntity {
 
-
     @PrimaryKey
     @NonNull
     @SerializedName("ihris_pid")
@@ -24,6 +23,7 @@ public class MinistryWorkerEntity {
     private String dhis2_id;
     private String othername;
     private String phone;
+    private String fullName;
 
     @NonNull
     public String getPersonId() {
@@ -112,6 +112,14 @@ public class MinistryWorkerEntity {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getFullName() {
+        return surname+" "+((othername!=null)?othername:"")+" "+firstname;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     @Override

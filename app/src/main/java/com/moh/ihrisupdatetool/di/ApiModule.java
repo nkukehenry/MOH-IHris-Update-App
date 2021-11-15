@@ -2,6 +2,11 @@ package com.moh.ihrisupdatetool.di;
 
 import android.app.Application;
 import android.app.ProgressDialog;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+
+import androidx.annotation.NonNull;
 
 import com.moh.ihrisupdatetool.api.AppApi;
 import com.moh.ihrisupdatetool.repo.remote.GenericAppRepository;
@@ -63,8 +68,7 @@ public class ApiModule {
 
                 Response response = chain.proceed(requestBuilder.build());
 
-                apiErrorHandler.closeNetworkRequestLoader();
-
+               // apiErrorHandler.closeNetworkRequestLoader();
 
                 return response;
             }
@@ -121,7 +125,7 @@ public class ApiModule {
 
     @Singleton
     @Provides
-    public static ProgressDialog provideProgressDialog(Application application) {
+    public  ProgressDialog provideProgressDialog(Application application) {
 
         final ProgressDialog loader = new ProgressDialog(application.getApplicationContext());
         loader.setMessage("Loading...");
