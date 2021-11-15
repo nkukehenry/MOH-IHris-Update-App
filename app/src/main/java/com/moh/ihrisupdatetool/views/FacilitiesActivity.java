@@ -1,5 +1,6 @@
 package com.moh.ihrisupdatetool.views;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,5 +51,12 @@ public class FacilitiesActivity extends AppCompatActivity {
         });
 
         facilitiesViewModel.getFacilities();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

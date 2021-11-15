@@ -24,6 +24,7 @@ public class UIHelper {
     public UIHelper(Context context) {
         progressDialog = new ProgressDialog(context);
         dialog = new Dialog(context);
+        dialog.setCancelable(false);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
     }

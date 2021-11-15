@@ -72,6 +72,7 @@ public class CommunityWorkerAdapter extends RecyclerView.Adapter<CommunityWorker
 
             Intent intent = new Intent(v.getContext(), FormsActivity.class);
             AppData.selectedCommunityWorker = this.cworkerListBinding.getPerson();
+            System.out.println( AppData.selectedCommunityWorker);
             v.getContext().startActivity(intent);
         }
     }

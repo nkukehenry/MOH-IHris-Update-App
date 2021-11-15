@@ -36,15 +36,21 @@ public class MinistryWorkerRepository {
         return ministryWorkerResponse;
     }
 
+    public void fetchMinistryWorkers(Boolean truncate) {
+        fetchMinistryWorkers();
+    }
+
     public void fetchMinistryWorkers(){
 
-        ministryWorkerDao.getMinistryWorkers().observeForever(o->{
+        fetchFromApi();
 
-            if(o.isEmpty()){ fetchFromApi(); } else {
-                this.ministryWorkerResponse.postValue(o);
-            }
-
-        });
+//        ministryWorkerDao.getMinistryWorkers().observeForever(o->{
+//
+//            if(o.isEmpty()){ fetchFromApi(); } else {
+//                this.ministryWorkerResponse.postValue(o);
+//            }
+//
+//        });
 
     }
 
@@ -52,7 +58,8 @@ public class MinistryWorkerRepository {
 
         ministryWorkerDao.searchWorker(term,districtName).observeForever(o->{
             if(o.isEmpty()){
-                fetchFromApi();
+                //fetchFromApi();
+                this.ministryWorkerResponse.postValue(null);
             } else {
                 this.ministryWorkerResponse.postValue(o);
             }
@@ -92,5 +99,6 @@ public class MinistryWorkerRepository {
             return null;
         }
     }
+
 }
 

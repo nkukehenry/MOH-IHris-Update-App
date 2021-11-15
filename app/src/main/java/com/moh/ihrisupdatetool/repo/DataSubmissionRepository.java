@@ -50,6 +50,7 @@ public class DataSubmissionRepository {
                         for (DataEntryTemplate record :records) {
                             postData(record.getFormdata());
                             resp.addProperty("state",true);
+                            resp.addProperty("isUploaded",true);
                         }
                     }else{
                         resp.addProperty("state",false);
@@ -65,8 +66,6 @@ public class DataSubmissionRepository {
         cacheFormData(postData,false);
 
         genericAppRepository.post(AppConstants.POST_FORM_DATA_URL(),postData).observeForever(o -> {
-
-            System.out.println(o);
 
             if(o != null){
                 //convert response to required type

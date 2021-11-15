@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -15,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -40,6 +42,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -48,20 +52,23 @@ import static com.moh.ihrisupdatetool.utils.AppConstants.SELECTED_FORM;
 @AndroidEntryPoint
 public class FormDataActivity extends AppCompatActivity {
 
+    private final String TAG = FormDataActivity.class.getSimpleName();
+
     private FormsViewModel formsViewModel;
     private FormEntity selectedForm;
-    private LinearLayout dynamicFieldsWrapper,formNavigator;
+    private LinearLayout dynamicFieldsWrapper, formNavigator;
     private JsonObject postDataObject;
     private SubmissionViewModel submissionViewModel;
     private List<FormField> formFields;
-    private Button submitBtn,nextFormButton,prevFormButton;
+    private Button submitBtn, nextFormButton, prevFormButton;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     private FormField currentImageField;
-    private Boolean hasNextForm = true,hasPrevForm = true;
+    private Boolean hasNextForm = true, hasPrevForm = true;
     private UIHelper uiHelper;
     private TextView formTitle;
     private CommunityWorkerEntity selectedCommWorker;
     private MinistryWorkerEntity selectedMinWorker;
+    private int exitCounter=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,27 +77,32 @@ public class FormDataActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_fields);
+        try{
+            initAcitvity();
+        }catch(Exception ex){
+            uiHelper.showDialog(ex.getMessage());
+        }
+    }
 
+    private void initAcitvity(){
         postDataObject = new JsonObject();
-        postDataObject.addProperty("reference",AppUtils.getRandomString(12));
+        postDataObject.addProperty("reference", AppUtils.getRandomString(12));
 
         nextFormButton = findViewById(R.id.nextFormBtn);
         prevFormButton = findViewById(R.id.previousFormBtn);
         formNavigator = findViewById(R.id.formNavigator);
-        dynamicFieldsWrapper  = findViewById(R.id.dynamicFieldsWrapper);
+        dynamicFieldsWrapper = findViewById(R.id.dynamicFieldsWrapper);
         formTitle = findViewById(R.id.formTitle);
-        prevFormButton.setEnabled(false);
 
-        Bundle bundle; bundle = getIntent().getExtras();
-        selectedForm   = (FormEntity) bundle.get(SELECTED_FORM);
+        Bundle bundle;
+        bundle = getIntent().getExtras();
+        selectedForm = (FormEntity) bundle.get(SELECTED_FORM);
 
         selectedCommWorker = AppData.selectedCommunityWorker;
-        selectedMinWorker  = AppData.selectedMinistryWorker;
-
-        prefillIndividulValues();
+        selectedMinWorker = AppData.selectedMinistryWorker;
 
         formsViewModel = new ViewModelProvider(this).get(FormsViewModel.class);
-        submissionViewModel =  new ViewModelProvider(this).get(SubmissionViewModel.class);
+        submissionViewModel = new ViewModelProvider(this).get(SubmissionViewModel.class);
         submitBtn = findViewById(R.id.submitBtn);
 
         submitBtn.setOnClickListener(v -> {
@@ -99,34 +111,62 @@ public class FormDataActivity extends AppCompatActivity {
 
         initObservers();
         getFormFields();
+    }
+
+    private void prefillHealthWorkerValues() {
+
+        //worker Type is per selection on mainactivity
+        String workerType = (AppData.isCommunityWorker)?"chw":"mhw";
+        postDataObject.addProperty("hw_type",workerType);
+
+        List<FormEntity> forms = AppData.allForms;
+        int currentFormIndex = forms.indexOf(selectedForm);
+        int lastIndex = forms.size() - 1;
+
+        Log.e(TAG,"Selected form: " + currentFormIndex);
+
+        if(currentFormIndex == 0) {
+            prevFormButton.setEnabled(false);
+        }else if(currentFormIndex == lastIndex ){
+            prevFormButton.setEnabled(true);
+            nextFormButton.setEnabled(false);
+        }else{
+            prevFormButton.setEnabled(true);
+        }
+
+
+        if (selectedCommWorker != null) {
+
+            postDataObject.addProperty("surname", selectedCommWorker.getSurname());
+            postDataObject.addProperty("othername", selectedCommWorker.getOthername());
+            postDataObject.addProperty("firstname", selectedCommWorker.getFirstname());
+            postDataObject.addProperty("ihris_pid", selectedCommWorker.getPersonId());
+            postDataObject.addProperty("primary_mobile_number", selectedCommWorker.getMobile());
+        }
+        else if (selectedMinWorker != null) {
+
+            postDataObject.addProperty("surname", selectedMinWorker.getSurname());
+            postDataObject.addProperty("othername", selectedMinWorker.getOthername());
+            postDataObject.addProperty("firstname", selectedMinWorker.getFirstname());
+            postDataObject.addProperty("ihris_pid", selectedMinWorker.getPersonId());
+            postDataObject.addProperty("primary_mobile_number", selectedMinWorker.getPhone());
+        }
 
     }
 
-    private void prefillIndividulValues(){
-
-        if(selectedCommWorker!=null){
-
-            postDataObject.addProperty("surname",selectedCommWorker.getSurname());
-            postDataObject.addProperty("othername",selectedCommWorker.getOthername());
-            postDataObject.addProperty("firstname",selectedCommWorker.getFirstname());
-            postDataObject.addProperty("ihris_pid",selectedCommWorker.getPersonId());
-            postDataObject.addProperty("primary_mobile_number",selectedCommWorker.getMobile());
-        }
-        else if(selectedMinWorker!=null){
-            postDataObject.addProperty("surname",selectedMinWorker.getSurname());
-            postDataObject.addProperty("othername",selectedMinWorker.getOthername());
-            postDataObject.addProperty("firstname",selectedMinWorker.getFirstname());
-            postDataObject.addProperty("ihris_pid",selectedMinWorker.getPersonId());
-            postDataObject.addProperty("primary_mobile_number",selectedMinWorker.getPhone());
-        }
-
-    }
-
-    private void initObservers(){
+    private void initObservers() {
 
         formsViewModel.observerFormFieldsResponse().observe(this, formsFieldsResponse -> {
 
-            uiHelper.hideLoader();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    uiHelper.hideLoader();
+                }
+            }, 1000);
+
+            prefillHealthWorkerValues();//attempt to populate worker's info
+
             dynamicFieldsWrapper.removeAllViews();
             formFields = formsFieldsResponse;
             submitBtn.setEnabled(false);
@@ -150,24 +190,26 @@ public class FormDataActivity extends AppCompatActivity {
                     }
                 }
 
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
+            }finally {
+                updateUIOnNavigation();
             }
 
         });
 
         //submission
-        submissionViewModel.observeResonse().observe( this,submissionResponse->{
-           try {
-               uiHelper.hideLoader();
-               uiHelper.showDialog("Entry finished successfully");
-           }catch (Exception ex){
+        submissionViewModel.observeResonse().observe(this, submissionResponse -> {
+            try {
+                uiHelper.hideLoader();
+                uiHelper.showDialog("Entry finished successfully");
+            } catch (Exception ex) {
                 ex.printStackTrace();
-           }finally {
-               Intent intent = new Intent(this, MainActivity.class);
-               startActivity(intent);
-               finish();
-           }
+            } finally {
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
 
         });
     }
@@ -177,22 +219,22 @@ public class FormDataActivity extends AppCompatActivity {
         formsViewModel.getFormFields(selectedForm.getId());
     }
 
-    private void renderTextBasedField(FormField field){
+    private void renderTextBasedField(FormField field) {
 
         // Create EditText
-        TextInputLayout currentField =new TextInputLayout(this);
+        TextInputLayout currentField = new TextInputLayout(this);
 
         //Params
-        TextInputLayout.LayoutParams params= new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.topMargin =8;
-        params.bottomMargin=8;
+        TextInputLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.topMargin = 8;
+        params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
 
         //Input
         final EditText edtPass = new EditText(currentField.getContext());
-        edtPass.setInputType( AppUtils.getInputTypeClass(field.getData_type()) );
-        edtPass.setPadding(25,100,25,10);
+        edtPass.setInputType(AppUtils.getInputTypeClass(field.getData_type()));
+        edtPass.setPadding(25, 100, 25, 10);
         edtPass.setTextColor(getResources().getColor(R.color.grey));
         edtPass.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         edtPass.setHint(field.getLabel());
@@ -201,9 +243,14 @@ public class FormDataActivity extends AppCompatActivity {
 
         JsonElement element = postDataObject.get(field.getForm_field());
 
-        if( element !=null) {
-            String elemValue = element.getAsString();
-            edtPass.setText(elemValue.toString());
+        if (element != null) {
+            try {
+                String elemValue = element.getAsString();
+                edtPass.setText(elemValue.toString());
+            }catch(Exception ex){
+                Log.e(TAG,field.getForm_field() +" value not set");
+                ex.printStackTrace();
+            }
         }
 
         currentField.addView(edtPass);
@@ -211,27 +258,27 @@ public class FormDataActivity extends AppCompatActivity {
         dynamicFieldsWrapper.addView(currentField);
     }
 
-    private void renderImageField(FormField field){
+    private void renderImageField(FormField field) {
 
         // Create EditText
         TextInputLayout currentField = new TextInputLayout(this);
 
         //Params
-        TextInputLayout.LayoutParams params= new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.topMargin =8;
-        params.bottomMargin=8;
+        TextInputLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.topMargin = 8;
+        params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
 
         //Input
         final TextView imageHolder = new TextView(currentField.getContext());
 
-        imageHolder.setPadding(25,25,25,25);
+        imageHolder.setPadding(25, 25, 25, 25);
         imageHolder.setTextColor(getResources().getColor(R.color.grey));
         imageHolder.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         imageHolder.setBackgroundColor(0x00000000);
         imageHolder.setId(Integer.parseInt(field.getId()));
-        imageHolder.setText("Choose "+field.getLabel());
+        imageHolder.setText("Choose " + field.getLabel());
 
         imageHolder.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -241,11 +288,11 @@ public class FormDataActivity extends AppCompatActivity {
             }
         });
 
-        ImageView imageView= new ImageView(currentField.getContext());
-        imageView.setId(Integer.parseInt(field.getId())*300);
+        ImageView imageView = new ImageView(currentField.getContext());
+        imageView.setId(Integer.parseInt(field.getId()) * 300);
         imageView.setVisibility(View.GONE);
-        imageView.setLayoutParams( new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        imageView.setPadding(10,30,10,10);
+        imageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        imageView.setPadding(10, 30, 10, 10);
 
         currentField.addView(imageHolder);
         currentField.addView(imageView);
@@ -264,14 +311,12 @@ public class FormDataActivity extends AppCompatActivity {
         }
     }
 
-    private void renderSpinnerBasedField(FormField field){
+    private void renderSpinnerBasedField(FormField field) {
 
-        System.out.println(field);
         Gson gson = new Gson();
-        Type targetType = new TypeToken<List<Map<String,String>>>() {}.getType();
-        List<Map<String,String>> options = gson.fromJson(field.getDefault_data(),targetType);
-
-        System.out.println(options);
+        Type targetType = new TypeToken<List<Map<String, String>>>() {
+        }.getType();
+        List<Map<String, String>> options = gson.fromJson(field.getDefault_data(), targetType);
 
         List<String> listOptions = new ArrayList<String>();
 
@@ -280,15 +325,15 @@ public class FormDataActivity extends AppCompatActivity {
          * Consider value in position 1 for if there values are >1 in count
          * Else take position 0 if values count ==1
          */
-        if(options != null){
+        if (options != null) {
 
             for (Map<String, String> option : options) {
 
                 int count = 0;
-                for(String value:option.values()) {
-                    if( (count == 1 && option.values().size() >1) || option.values().size() ==1)//use  only second value
-                     listOptions.add(value);
-                    count ++;
+                for (String value : option.values()) {
+                    if ((count == 1 && option.values().size() > 1) || option.values().size() == 1)//use  only second value
+                        listOptions.add(value);
+                    count++;
                 }
             }
         }
@@ -296,25 +341,28 @@ public class FormDataActivity extends AppCompatActivity {
 
         final List<String> spinnerOptions = listOptions;
 
-        if(spinnerOptions.isEmpty())
+        if (spinnerOptions.isEmpty())
             return;
 
-        LinearLayout currentField =new LinearLayout(this);
+        LinearLayout currentField = new LinearLayout(this);
 
         //Params
-        LinearLayout.LayoutParams params= new LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
-                params.topMargin = 8;
-                params.bottomMargin = 8;
+        params.topMargin = 8;
+        params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
+        currentField.setOrientation(LinearLayout.VERTICAL);
 
-        spinnerOptions.add("Choose "+field.getLabel());
+        TextView spinnerLabel = new TextView(this);
+        spinnerLabel.setText(field.getLabel());
+        //spinnerOptions.add();
         //Create spinner
         Spinner spinner = new Spinner(FormDataActivity.this);
         //Attach adapter to spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(FormDataActivity.this,R.layout.spinner_item,spinnerOptions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(FormDataActivity.this, R.layout.spinner_item, spinnerOptions);
         spinner.setAdapter(adapter);
         spinner.setLayoutParams(params);
 
@@ -327,24 +375,23 @@ public class FormDataActivity extends AppCompatActivity {
                 /**
                  * Postions should always be less than list size,else outof range
                  */
-                if( position < options.size()) {
-
-                    System.out.println(spinnerOptions.get(position));
-                    System.out.println(options.get(position));
+                if (position < options.size()) {
                     postDataObject.addProperty(field.getForm_field(), spinnerOptions.get(position));
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
 
+        currentField.addView(spinnerLabel);
         currentField.addView(spinner);
         dynamicFieldsWrapper.addView(currentField);
     }
 
-    private void preparePostData(){
+    private void preparePostData() {
 
         try {
             for (FormField field : formFields) {
@@ -357,12 +404,12 @@ public class FormDataActivity extends AppCompatActivity {
                 }
 
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private void cacheData(){
+    private void cacheData() {
         preparePostData();
         submissionViewModel.cacheData(postDataObject);
     }
@@ -378,12 +425,12 @@ public class FormDataActivity extends AppCompatActivity {
 
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
 
-                ImageView imageView = findViewById(Integer.parseInt(currentImageField.getId())*300);
+                ImageView imageView = findViewById(Integer.parseInt(currentImageField.getId()) * 300);
                 imageView.setImageBitmap(photo);
                 imageView.setVisibility(View.VISIBLE);
 
                 String encodedImage = AppUtils.bitmapTobase64(photo);
-                postDataObject.addProperty(currentImageField.getForm_field(),encodedImage);
+                postDataObject.addProperty(currentImageField.getForm_field(), encodedImage);
                 TextView imageLabel = findViewById(Integer.parseInt(currentImageField.getId()));
                 imageLabel.setText(currentImageField.getLabel() + ": Attached Successfully");
 
@@ -397,43 +444,37 @@ public class FormDataActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-
-      /*  Intent intent = new Intent(this, FormsActivity.class);
-        startActivity(intent);
-        finish();
-       */
-        uiHelper.showDialog("Please complete this survey before attempting to close");
-    }
-
-    private void updateUIOnNavigation(){
+    private void updateUIOnNavigation() {
 
         List<FormEntity> forms = AppData.allForms;
         int currentFormIndex = forms.indexOf(selectedForm);
+        int lastIndex = forms.size() - 1;
 
-        //submit enabled on last one
-        if(currentFormIndex == (forms.size() -1) ) {
-            submitBtn.setEnabled(true);
-        }else{
-            submitBtn.setEnabled(false);
-        }
+        Log.e(TAG,"forms size: "+forms.size());
+        Log.e(TAG,"forms last: "+lastIndex);
+        Log.e(TAG,"forms last: "+currentFormIndex);
+
 
         //Next btn
-        if( hasNextForm){
+        if (hasNextForm) {
             nextFormButton.setEnabled(true);
-        }else{
+        } else {
             nextFormButton.setEnabled(false);
         }
 
         //Previous btn hide/show
-        if(hasPrevForm){
+        if (hasPrevForm) {
             prevFormButton.setEnabled(true);
-        }else {
+        } else {
             prevFormButton.setEnabled(false);
         }
 
-
+        //submit enabled on last one
+        if (currentFormIndex == lastIndex) {
+            submitBtn.setEnabled(true);
+        } else {
+            submitBtn.setEnabled(false);
+        }
 
     }
 
@@ -444,25 +485,26 @@ public class FormDataActivity extends AppCompatActivity {
 
     public void onNextClick(View view) {
 
+
         cacheData();
 
         List<FormEntity> forms = AppData.allForms;
         int currentFormIndex = forms.indexOf(selectedForm);
 
-        if(currentFormIndex < (forms.size()-1)) {
+        if (currentFormIndex < (forms.size() - 1)) {
             selectedForm = forms.get(currentFormIndex + 1);
-            hasNextForm  = true;
-            hasPrevForm  = true;
+            hasNextForm = true;
+            hasPrevForm = true;
             getFormFields();
-        }else {
+        } else {
             hasNextForm = false;
-            hasPrevForm  = true;
+            hasPrevForm = true;
         }
 
-        updateUIOnNavigation();
     }
 
     public void onPrevClick(View view) {
+
         cacheData();
 
         List<FormEntity> forms = AppData.allForms;
@@ -470,16 +512,37 @@ public class FormDataActivity extends AppCompatActivity {
 
         int index = currentFormIndex - 1;
 
-        if(index > -1) {
+        if (index > -1) {
             selectedForm = forms.get(index);
-            hasPrevForm  = true;
+            hasPrevForm = true;
             hasNextForm = true;
             getFormFields();
-        }else {
+        } else {
             selectedForm = forms.get(0);
             hasPrevForm = false;
             hasNextForm = true;
         }
-        updateUIOnNavigation();
     }
+
+    @Override
+    public void onBackPressed() {
+
+        if (exitCounter < 1) {
+            Toast.makeText(this, "Press back to abandon form", Toast.LENGTH_LONG).show();
+            exitCounter++;
+
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    exitCounter = 0;
+                }
+            }, 5000);
+
+        } else {
+            Intent intent = new Intent(this,FormsActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
 }

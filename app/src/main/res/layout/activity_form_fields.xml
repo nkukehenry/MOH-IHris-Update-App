@@ -27,7 +27,7 @@
     </LinearLayout>
 <ScrollView
     android:layout_width="match_parent"
-    android:layout_height="530dp"
+    android:layout_height="wrap_content"
     android:paddingBottom="20dp"
     android:orientation="vertical">
 <LinearLayout
@@ -43,11 +43,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-
-
-</LinearLayout>
-
-</ScrollView>
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -80,21 +75,26 @@
         </LinearLayout>
 
         <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:orientation="horizontal">
-        <Button
-        android:layout_marginBottom="0dp"
-        android:id="@+id/submitBtn"
-        android:padding="13dp"
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:text="SUBMIT FORM"
-        android:enabled="false"
-        android:layout_height="wrap_content"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:orientation="horizontal">
+            <Button
+                android:layout_marginBottom="0dp"
+                android:id="@+id/submitBtn"
+                android:padding="13dp"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:text="SUBMIT FORM"
+                android:enabled="false"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
     </RelativeLayout>
+
+</LinearLayout>
+
+</ScrollView>
+
 
 </LinearLayout>

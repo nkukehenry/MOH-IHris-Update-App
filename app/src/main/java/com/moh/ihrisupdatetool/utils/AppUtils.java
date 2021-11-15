@@ -82,7 +82,7 @@ public class AppUtils {
     {
         Random random = new Random();
         String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijk"
-                +"lmnopqrstuvwxyz!@#$%&";
+                +"lmnopqrstuvwxyz";
         Random rnd = new Random();
         StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++)

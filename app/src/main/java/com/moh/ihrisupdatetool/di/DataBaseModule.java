@@ -28,7 +28,7 @@ public class DataBaseModule {
     @Singleton
     @Provides
     public AppDatabase getAppDatabase(Application application){
-        return Room.databaseBuilder(application.getApplicationContext(),AppDatabase.class,"qt_app_database")
+        return Room.databaseBuilder(application.getApplicationContext(),AppDatabase.class,"ihris_app_database")
                 .fallbackToDestructiveMigration()
                 .allowMainThreadQueries()
                 .build();

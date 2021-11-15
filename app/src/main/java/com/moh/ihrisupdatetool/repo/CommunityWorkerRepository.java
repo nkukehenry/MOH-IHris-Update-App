@@ -36,13 +36,18 @@ public class CommunityWorkerRepository {
 
     public void fetchCommunityWorkers(){
 
-        communitWorkerDao.getCommunityWorkers().observeForever(o->{
+        fetchFromApi();
 
-            if(o.isEmpty()){ fetchFromApi(); } else {
-                this.communityWorkerResponse.postValue(o);
-            }
-
-        });
+//        communitWorkerDao.getCommunityWorkers().observeForever(o->{
+//
+//            if(o.isEmpty()){
+//                //fetchFromApi();
+//                this.communityWorkerResponse.postValue(null);
+//            } else {
+//                this.communityWorkerResponse.postValue(o);
+//            }
+//
+//        });
 
     }
 
@@ -50,7 +55,8 @@ public class CommunityWorkerRepository {
 
         communitWorkerDao.searchWorker(term,districtName).observeForever(o->{
             if(o.isEmpty()){
-                  fetchFromApi();
+                  //fetchFromApi();
+                this.communityWorkerResponse.postValue(null);
                  } else {
                 this.communityWorkerResponse.postValue(o);
             }

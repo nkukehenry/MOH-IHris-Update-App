@@ -7,8 +7,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.moh.ihrisupdatetool.R;
 import com.moh.ihrisupdatetool.adapaters.CommunityWorkerAdapter;
@@ -16,8 +20,11 @@ import com.moh.ihrisupdatetool.adapaters.FormsAdapter;
 import com.moh.ihrisupdatetool.adapaters.MinistryWorkerAdapter;
 import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
 import com.moh.ihrisupdatetool.utils.AppData;
+import com.moh.ihrisupdatetool.utils.UIHelper;
 import com.moh.ihrisupdatetool.viewmodels.WorkersViewModel;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -26,18 +33,24 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class PersonSearchActivity extends AppCompatActivity {
 
-    Button searchButton;
-    EditText searchTerm;
-    WorkersViewModel workersViewModel;
-    RecyclerView comunityWorkerRecycler,ministryWorkerRecycler;
-    DistrictEntity selectedDistrict;
+    private Button searchButton;
+    private EditText searchTerm;
+    private WorkersViewModel workersViewModel;
+    private RecyclerView comunityWorkerRecycler,ministryWorkerRecycler;
+    private DistrictEntity selectedDistrict;
+    private UIHelper uiHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person_search);
 
+        //Reset workers
+        AppData.selectedMinistryWorker  = null;
+        AppData.selectedCommunityWorker = null;
+
         selectedDistrict = AppData.selectedDistrict;
+        uiHelper = new UIHelper(this);
 
         searchButton = findViewById(R.id.searchButton);
         searchTerm =  findViewById(R.id.searchTerm);
@@ -45,40 +58,64 @@ public class PersonSearchActivity extends AppCompatActivity {
         comunityWorkerRecycler = findViewById(R.id.comunityWorkerRecycler);
         ministryWorkerRecycler = findViewById(R.id.ministryWorkerRecycler);
 
-        LinearLayoutManager linearLayout = new LinearLayoutManager(this);
-        comunityWorkerRecycler.setLayoutManager(linearLayout);
+        LinearLayoutManager communitylinearLayout = new LinearLayoutManager(this);
+        LinearLayoutManager ministrylinearLayout = new LinearLayoutManager(this);
+        comunityWorkerRecycler.setLayoutManager(communitylinearLayout);
+        ministryWorkerRecycler.setLayoutManager(ministrylinearLayout);
 
         workersViewModel = new ViewModelProvider(this).get(WorkersViewModel.class);
 
+        //Initilaizes response observers for the search
         observePersonsResponse();
 
         searchButton.setOnClickListener(v->{
-            String term = searchTerm.getText().toString();
-//            Intent intent = new Intent(this, FormsActivity.class);
-//            v.getContext().startActivity(intent);
-            System.out.println(selectedDistrict);
 
-            if(term!=null && !term.isEmpty())
-              workersViewModel.searchWorker(term,selectedDistrict.getDistrictName(),AppData.isCommunityWorker);
-        });
+            String term = searchTerm.getText().toString();
+
+            if(term!=null && !term.isEmpty()) {
+                uiHelper.showLoader();
+                workersViewModel.searchWorker(term, selectedDistrict.getDistrictName(), AppData.isCommunityWorker);
+               }
+            });
+
 
     }
 
     private void observePersonsResponse(){
 
+        //community workers observer
         workersViewModel.observeCommunityWorkers().observe( this,workersResponse->{
-                System.out.println(workersResponse);
 
-                if(!workersResponse.isEmpty()) {
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        uiHelper.hideLoader();
+                    }
+                }, 1000);
+
+                if(workersResponse == null) {
+                    Toast.makeText(this, "No records found", Toast.LENGTH_LONG).show();
+                }
+                else if(!workersResponse.isEmpty()) {
                     CommunityWorkerAdapter formsAdapter = new CommunityWorkerAdapter(workersResponse, this);
                     comunityWorkerRecycler.setAdapter(formsAdapter);
                 }
         });
 
+        //ministry workers observer
         workersViewModel.observeMinistryWorkers().observe( this,workersResponse->{
-            System.out.println(workersResponse);
 
-            if(!workersResponse.isEmpty()) {
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    uiHelper.hideLoader();
+                }
+            }, 1000);
+
+            if(workersResponse == null) {
+                Toast.makeText(this, "No records found", Toast.LENGTH_LONG).show();
+            }
+            else if(!workersResponse.isEmpty()) {
                 MinistryWorkerAdapter formsAdapter = new MinistryWorkerAdapter(workersResponse, this);
                 ministryWorkerRecycler.setAdapter(formsAdapter);
             }
@@ -86,6 +123,37 @@ public class PersonSearchActivity extends AppCompatActivity {
 
 
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.search_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.newRecord:
+                  goToFormWithNewRecord();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void goToFormWithNewRecord() {
+        Intent intent = new Intent(this,FormsActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+      Intent intent = new Intent(this,MainActivity.class);
+      startActivity(intent);
+      finish();
     }
 
 }

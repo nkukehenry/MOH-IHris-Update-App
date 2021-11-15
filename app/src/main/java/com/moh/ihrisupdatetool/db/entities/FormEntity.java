@@ -57,4 +57,18 @@ public class FormEntity implements Serializable {
                 ", status=" + status +
                 '}';
     }
+
+    @Override
+    public int hashCode(){
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FormEntity that = (FormEntity) o;
+        return id.equals(that.id);
+    }
+
 }

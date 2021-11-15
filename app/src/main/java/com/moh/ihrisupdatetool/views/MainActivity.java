@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private WorkersViewModel workersViewModel;
     private SubmissionViewModel submissionViewModel;
     private UIHelper uiHelper;
+    private int exitCounter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
         syncingResponseObserver();
 
-    }
-
-    private void getHealthWorkers(){
-        workersViewModel.getCommunityHealthWorkers();
     }
 
     public void searchMinistryWorker(View view) {
@@ -60,19 +57,43 @@ public class MainActivity extends AppCompatActivity {
     private void syncingResponseObserver(){
         //submission
         submissionViewModel.observeResonse().observe( this,submissionResponse->{
+
+           try {
+               String msg = "Sync finished successfully";
+
+               if (!submissionResponse.get("state").getAsBoolean())
+                   msg = "There wasn't any unsynchronized data";
+
+               uiHelper.hideLoader();
+               uiHelper.showDialog(msg);
+
+           }catch (Exception ex){
+               ex.printStackTrace();
+           }
+
+        });
+
+        //workers observer
+        workersViewModel.observeMinistryWorkers().observe( this,submissionResponse->{
             String msg = "Sync finished successfully";
-
-            if(!submissionResponse.get("state").getAsBoolean())
-                msg = "There wasn't any unsynchronized data";
-
             uiHelper.hideLoader();
-            uiHelper.showDialog(msg);
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         });
     }
 
     private void syncCollectedLocalData(){
         uiHelper.showLoader("Synchronizing data...");
-        submissionViewModel.syncData();
+        try {
+            submissionViewModel.syncData();
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    private void syncResources(){
+        uiHelper.showLoader("Synchronizing resources...");
+        workersViewModel.getCommunityHealthWorkers();
+        workersViewModel.getMinistryHealthWorkers();
     }
 
     @Override
@@ -82,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -91,10 +111,21 @@ public class MainActivity extends AppCompatActivity {
                 syncCollectedLocalData();
                 return true;
             case R.id.syncResources:
-                Toast.makeText(this,"Coming soon!",Toast.LENGTH_LONG).show();
+                syncResources();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(exitCounter<1){
+            Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+            exitCounter++;
+        }else {
+            finishAffinity();
+            System.exit(0);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.moh.ihrisupdatetool.db.entities;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
@@ -12,8 +13,8 @@ import java.io.Serializable;
 @Entity (tableName = "form_data")
 public class DataEntryTemplate implements Serializable {
 
-    @PrimaryKey(autoGenerate = true)
-    private  int id;
+    @PrimaryKey
+    @NonNull
     private String reference;
     private String ihris_pid;
     private String facility_id;
@@ -22,15 +23,7 @@ public class DataEntryTemplate implements Serializable {
 
     @TypeConverters(JsonObjectConverter.class)
     private JsonObject formdata;
-
     private Boolean isUploaded=false;
-
-    public void setId(int id) {
-        this.id = id;
-    }
-    public int getId() {
-        return id;
-    }
 
     public String getIhris_pid() {
         return ihris_pid;

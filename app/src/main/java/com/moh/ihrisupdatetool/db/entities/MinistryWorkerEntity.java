@@ -23,6 +23,9 @@ public class MinistryWorkerEntity {
     private String dhis2_id;
     private String othername;
     private String phone;
+    private String facility;
+    private String national_id;
+    private String facility_id;
     private String fullName;
 
     @NonNull
@@ -118,6 +121,31 @@ public class MinistryWorkerEntity {
         return surname+" "+((othername!=null)?othername:"")+" "+firstname;
     }
 
+
+    public String getFacility() {
+        return facility;
+    }
+
+    public void setFacility(String facility) {
+        this.facility = facility;
+    }
+
+    public String getNational_id() {
+        return national_id;
+    }
+
+    public void setNational_id(String national_id) {
+        this.national_id = national_id;
+    }
+
+    public String getFacility_id() {
+        return facility_id;
+    }
+
+    public void setFacility_id(String facility_id) {
+        this.facility_id = facility_id;
+    }
+
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
@@ -136,6 +164,9 @@ public class MinistryWorkerEntity {
                 ", dhis2_id='" + dhis2_id + '\'' +
                 ", othername='" + othername + '\'' +
                 ", phone='" + phone + '\'' +
+                ", facility='" + facility + '\'' +
+                ", national_id='" + national_id + '\'' +
+                ", facility_id='" + facility_id + '\'' +
                 '}';
     }
 }
