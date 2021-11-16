@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.DistrictsDao;
 import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
-import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
+import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 
@@ -19,12 +19,12 @@ import javax.inject.Inject;
 
 public class DistrictsRepository {
 
-    private IGenericAppRepository genericAppRepository;
+    private IAppRemoteCallRepository genericAppRepository;
     private MutableLiveData<List<DistrictEntity>> districtsResponse;
     private DistrictsDao districtsDao;
 
     @Inject
-    public DistrictsRepository(IGenericAppRepository genericAppRepository,DistrictsDao districtsDao) {
+    public DistrictsRepository(IAppRemoteCallRepository genericAppRepository, DistrictsDao districtsDao) {
         this.genericAppRepository = genericAppRepository;
         this.districtsResponse = new MutableLiveData<>();
         this.districtsDao = districtsDao;

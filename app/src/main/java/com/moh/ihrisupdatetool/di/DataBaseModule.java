@@ -13,6 +13,7 @@ import com.moh.ihrisupdatetool.db.dao.FormFieldsDao;
 import com.moh.ihrisupdatetool.db.dao.FormsDao;
 import com.moh.ihrisupdatetool.db.dao.JobsDao;
 import com.moh.ihrisupdatetool.db.dao.MinistryWorkerDao;
+import com.moh.ihrisupdatetool.db.dao.SessionInfoDao;
 
 import javax.inject.Singleton;
 
@@ -81,6 +82,12 @@ public class DataBaseModule {
     @Singleton
     public static DataEntryDao dataEntryDao(AppDatabase appDatabase){
         return appDatabase.dataEntryDao();
+    }
+
+    @Provides
+    @Singleton
+    public static SessionInfoDao sessionInfoDao(AppDatabase appDatabase){
+        return appDatabase.sessionInfoDao();
     }
 
 

@@ -7,9 +7,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.MinistryWorkerDao;
-import com.moh.ihrisupdatetool.db.entities.CommunityWorkerEntity;
 import com.moh.ihrisupdatetool.db.entities.MinistryWorkerEntity;
-import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
+import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 
@@ -20,12 +19,12 @@ import javax.inject.Inject;
 
 public class MinistryWorkerRepository {
 
-    private IGenericAppRepository genericAppRepository;
+    private IAppRemoteCallRepository genericAppRepository;
     private MutableLiveData<List<MinistryWorkerEntity>> ministryWorkerResponse;
     private MinistryWorkerDao ministryWorkerDao;
 
     @Inject
-    public MinistryWorkerRepository(IGenericAppRepository genericAppRepository,MinistryWorkerDao ministryWorkerDao) {
+    public MinistryWorkerRepository(IAppRemoteCallRepository genericAppRepository, MinistryWorkerDao ministryWorkerDao) {
 
         this.genericAppRepository = genericAppRepository;
         this.ministryWorkerResponse = new MutableLiveData<>();

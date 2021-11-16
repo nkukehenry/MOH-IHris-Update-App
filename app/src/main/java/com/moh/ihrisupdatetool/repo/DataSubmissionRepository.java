@@ -2,7 +2,6 @@ package com.moh.ihrisupdatetool.repo;
 
 import android.os.AsyncTask;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
@@ -11,7 +10,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.DataEntryDao;
 import com.moh.ihrisupdatetool.db.dao.FormFieldsDao;
 import com.moh.ihrisupdatetool.db.entities.DataEntryTemplate;
-import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
+import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 
@@ -22,12 +21,12 @@ import javax.inject.Inject;
 
 public class DataSubmissionRepository {
 
-    private IGenericAppRepository genericAppRepository;
+    private IAppRemoteCallRepository genericAppRepository;
     private MutableLiveData<JsonObject> submissionResponse;
     private DataEntryDao dataEntryDao;
 
     @Inject
-    public DataSubmissionRepository(IGenericAppRepository genericAppRepository,FormFieldsDao  formsDao,DataEntryDao dataEntryDao) {
+    public DataSubmissionRepository(IAppRemoteCallRepository genericAppRepository, FormFieldsDao  formsDao, DataEntryDao dataEntryDao) {
 
         this.genericAppRepository = genericAppRepository;
         this.submissionResponse = new MutableLiveData<>();

@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.FormsDao;
 import com.moh.ihrisupdatetool.db.entities.FormEntity;
-import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
+import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 
@@ -18,12 +18,12 @@ import javax.inject.Inject;
 
 public class FormsRepository {
 
-    private IGenericAppRepository genericAppRepository;
+    private IAppRemoteCallRepository genericAppRepository;
     private MutableLiveData<List<FormEntity>> formsResponse;
     private FormsDao formsDao;
 
     @Inject
-    public FormsRepository(IGenericAppRepository genericAppRepository, FormsDao  formsDao) {
+    public FormsRepository(IAppRemoteCallRepository genericAppRepository, FormsDao  formsDao) {
 
         this.genericAppRepository = genericAppRepository;
         this.formsResponse = new MutableLiveData<>();

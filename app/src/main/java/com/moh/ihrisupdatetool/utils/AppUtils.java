@@ -69,6 +69,8 @@ public class AppUtils {
             case "date":
             case "email":
                 return FormFieldType.TEXT_BASED_FIELD;
+            case "charmap":
+                return FormFieldType.TEXT_AUTOCOMPLETE_FIELD;
             case "blob":
                 return FormFieldType.IMAGE_FIELD;
             case "map":

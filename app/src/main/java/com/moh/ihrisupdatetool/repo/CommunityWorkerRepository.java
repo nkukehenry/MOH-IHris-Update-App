@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.CommunityWorkerDao;
 import com.moh.ihrisupdatetool.db.entities.CommunityWorkerEntity;
-import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
+import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 
@@ -18,12 +18,12 @@ import javax.inject.Inject;
 
 public class CommunityWorkerRepository {
 
-    private IGenericAppRepository genericAppRepository;
+    private IAppRemoteCallRepository genericAppRepository;
     private MutableLiveData<List<CommunityWorkerEntity>> communityWorkerResponse;
     private CommunityWorkerDao communitWorkerDao;
 
     @Inject
-    public CommunityWorkerRepository(IGenericAppRepository genericAppRepository,CommunityWorkerDao commuityWorkerDao) {
+    public CommunityWorkerRepository(IAppRemoteCallRepository genericAppRepository, CommunityWorkerDao commuityWorkerDao) {
 
         this.genericAppRepository = genericAppRepository;
         this.communityWorkerResponse = new MutableLiveData<>();

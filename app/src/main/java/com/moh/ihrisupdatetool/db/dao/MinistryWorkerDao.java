@@ -17,6 +17,9 @@ public interface MinistryWorkerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(List<MinistryWorkerEntity> workers);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertSingle(MinistryWorkerEntity worker);
+
     @Query("SELECT * FROM min_workers")
     LiveData<List<MinistryWorkerEntity>> getMinistryWorkers();
 

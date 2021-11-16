@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.FacilitiesDao;
 import com.moh.ihrisupdatetool.db.entities.FacilityEntity;
-import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
+import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 
@@ -18,12 +18,12 @@ import javax.inject.Inject;
 
 public class FacilitiesRepository {
 
-    private IGenericAppRepository genericAppRepository;
+    private IAppRemoteCallRepository genericAppRepository;
     private MutableLiveData<List<FacilityEntity>> facilitiesResponse;
     private FacilitiesDao facilitiesDao;
 
     @Inject
-    public FacilitiesRepository(IGenericAppRepository genericAppRepository,FacilitiesDao facilitiesDao) {
+    public FacilitiesRepository(IAppRemoteCallRepository genericAppRepository, FacilitiesDao facilitiesDao) {
         this.genericAppRepository = genericAppRepository;
         this.facilitiesResponse = new MutableLiveData<>();
         this.facilitiesDao = facilitiesDao;

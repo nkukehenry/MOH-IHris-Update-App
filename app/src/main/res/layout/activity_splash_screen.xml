@@ -7,14 +7,14 @@
     android:orientation="vertical"
     android:layout_gravity="center_vertical"
     android:background="@color/white"
+    android:padding="50dp"
     tools:context=".views.SplashScreenActivity">
 
     <ImageView
-        android:layout_marginTop="200dp"
         android:layout_gravity="center"
-        android:layout_width="180dp"
-        android:src="@drawable/ministry"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:src="@drawable/ihris_splash"
+        android:layout_height="match_parent">
     </ImageView>
 
 </LinearLayout>

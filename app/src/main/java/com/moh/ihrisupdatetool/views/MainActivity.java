@@ -96,6 +96,12 @@ public class MainActivity extends AppCompatActivity {
         workersViewModel.getMinistryHealthWorkers();
     }
 
+    public void goToHistory() {
+        Intent intent = new Intent(this,HistoryActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -112,6 +118,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.syncResources:
                 syncResources();
+                return true;
+            case R.id.history:
+                goToHistory();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

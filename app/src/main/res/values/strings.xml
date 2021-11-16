@@ -1,8 +1,12 @@
 <resources>
-    <string name="app_name">IHRis Update Tool</string>
+    <string name="app_name">iHRIS Update Tool</string>
     <string name="community_health_worker">Community Health Worker</string>
     <string name="ministry_health_worker">Ministry Health Worker</string>
     <string name="district_label">District</string>
     <string name="sync_data">Sync Data</string>
     <string name="update_resources">Update Resources</string>
+    <string name="history">History</string>
+    <string name="login_here">LOGIN HERE</string>
+    <string name="enter_user_code">ENTER USER CODE</string>
+    <string name="login">LOGIN</string>
 </resources>

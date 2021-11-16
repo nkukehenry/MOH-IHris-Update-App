@@ -2,15 +2,10 @@ package com.moh.ihrisupdatetool.di;
 
 import android.app.Application;
 import android.app.ProgressDialog;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-
-import androidx.annotation.NonNull;
 
 import com.moh.ihrisupdatetool.api.AppApi;
-import com.moh.ihrisupdatetool.repo.remote.GenericAppRepository;
-import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
+import com.moh.ihrisupdatetool.repo.remote.AppRemoteCallRepository;
+import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.services.IApiErrorHandlingService;
 
 import java.io.IOException;
@@ -119,8 +114,8 @@ public class ApiModule {
 
     @Singleton
     @Provides
-    public IGenericAppRepository providesGenericAppRepository(AppApi appApi){
-        return new GenericAppRepository(appApi);
+    public IAppRemoteCallRepository providesGenericAppRepository(AppApi appApi){
+        return new AppRemoteCallRepository(appApi);
     }
 
     @Singleton

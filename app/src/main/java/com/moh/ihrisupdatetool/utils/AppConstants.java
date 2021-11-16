@@ -18,4 +18,5 @@ public class AppConstants {
     public static String GET_MINISTRY_WORKER_DATA_URL() { return  String.format("%s%s",BASE_URL3,"hwdata");}
     public static String GET_COMMUNITY_WORKER_DATA_URL() { return String.format("%s%s",BASE_URL2,"chwdata");}
 
+    public static String GET_LOGIN_BYCODE(String userCode) { return String.format("%s%s%s",BASE_URL,"auth/",userCode); }
 }

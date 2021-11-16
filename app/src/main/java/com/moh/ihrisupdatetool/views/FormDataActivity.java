@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -85,8 +86,12 @@ public class FormDataActivity extends AppCompatActivity {
     }
 
     private void initAcitvity(){
+
+        String userId = String.valueOf(AppData.userId);
+
         postDataObject = new JsonObject();
-        postDataObject.addProperty("reference", AppUtils.getRandomString(12));
+        postDataObject.addProperty("reference", AppUtils.getRandomString(11)+userId);
+        postDataObject.addProperty("user_id",userId);
 
         nextFormButton = findViewById(R.id.nextFormBtn);
         prevFormButton = findViewById(R.id.previousFormBtn);
@@ -127,10 +132,12 @@ public class FormDataActivity extends AppCompatActivity {
 
         if(currentFormIndex == 0) {
             prevFormButton.setEnabled(false);
-        }else if(currentFormIndex == lastIndex ){
+        }
+        else if(currentFormIndex == lastIndex ){
             prevFormButton.setEnabled(true);
             nextFormButton.setEnabled(false);
-        }else{
+        }
+        else{
             prevFormButton.setEnabled(true);
         }
 
@@ -165,6 +172,7 @@ public class FormDataActivity extends AppCompatActivity {
                 }
             }, 1000);
 
+
             prefillHealthWorkerValues();//attempt to populate worker's info
 
             dynamicFieldsWrapper.removeAllViews();
@@ -184,6 +192,9 @@ public class FormDataActivity extends AppCompatActivity {
                         case IMAGE_FIELD:
                             renderImageField(field);
                             break;
+                        case TEXT_AUTOCOMPLETE_FIELD:
+                            renderTextAutoCompleteField(field);
+                            break;
                         default:
                             renderTextBasedField(field);
                             break;
@@ -193,6 +204,7 @@ public class FormDataActivity extends AppCompatActivity {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }finally {
+                if(formsFieldsResponse!=null)
                 updateUIOnNavigation();
             }
 
@@ -222,22 +234,28 @@ public class FormDataActivity extends AppCompatActivity {
     private void renderTextBasedField(FormField field) {
 
         // Create EditText
-        TextInputLayout currentField = new TextInputLayout(this);
+        LinearLayout currentField = new LinearLayout(this);
 
         //Params
-        TextInputLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.topMargin = 8;
         params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
 
+        currentField.setOrientation(LinearLayout.VERTICAL);
+
+        TextView fieldLabel = new TextView(this);
+        fieldLabel.setText(field.getLabel());
+        currentField.addView(fieldLabel);
+
         //Input
         final EditText edtPass = new EditText(currentField.getContext());
         edtPass.setInputType(AppUtils.getInputTypeClass(field.getData_type()));
-        edtPass.setPadding(25, 100, 25, 10);
+        edtPass.setPadding(25, 50, 25, 10);
         edtPass.setTextColor(getResources().getColor(R.color.grey));
         edtPass.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        edtPass.setHint(field.getLabel());
+        //edtPass.setHint(field.getLabel());
         edtPass.setBackgroundColor(0x00000000);
         edtPass.setId(Integer.parseInt(field.getId()));
 
@@ -253,7 +271,13 @@ public class FormDataActivity extends AppCompatActivity {
             }
         }
 
+
         currentField.addView(edtPass);
+
+        View view = new View(this);
+        view.setBackgroundColor(getResources().getColor(R.color.grey));
+        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+        currentField.addView(view);
 
         dynamicFieldsWrapper.addView(currentField);
     }
@@ -338,7 +362,6 @@ public class FormDataActivity extends AppCompatActivity {
             }
         }
 
-
         final List<String> spinnerOptions = listOptions;
 
         if (spinnerOptions.isEmpty())
@@ -366,9 +389,24 @@ public class FormDataActivity extends AppCompatActivity {
         spinner.setAdapter(adapter);
         spinner.setLayoutParams(params);
 
-        /**
-         * Hook a an item selected handler for that particular input
-         */
+        //Attempt to set default item
+        JsonElement element = postDataObject.get(field.getForm_field());
+
+        if (element != null) {
+            try {
+                String elemValue = element.getAsString();
+                int selectedValue = adapter.getPosition(elemValue);
+                spinner.setSelection(selectedValue);
+            } catch (Exception ex) {
+                Log.e(TAG, field.getForm_field() + " value not set");
+                ex.printStackTrace();
+            }
+        }
+
+
+                /**
+                 * Hook a an item selected handler for that particular input
+                 */
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -388,6 +426,106 @@ public class FormDataActivity extends AppCompatActivity {
 
         currentField.addView(spinnerLabel);
         currentField.addView(spinner);
+
+        View view = new View(this);
+        view.setBackgroundColor(getResources().getColor(R.color.grey));
+        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+        currentField.addView(view);
+
+
+        dynamicFieldsWrapper.addView(currentField);
+    }
+
+    private void renderTextAutoCompleteField(FormField field) {
+
+        Gson gson = new Gson();
+        Type targetType = new TypeToken<List<Map<String, String>>>() {
+        }.getType();
+        List<Map<String, String>> options = gson.fromJson(field.getDefault_data(), targetType);
+
+        List<String> listOptions = new ArrayList<String>();
+
+        /**
+         * Extract fields , get there values (key->value)
+         * Consider value in position 1 for if there values are >1 in count
+         * Else take position 0 if values count ==1
+         */
+        if (options != null) {
+
+            for (Map<String, String> option : options) {
+
+                int count = 0;
+                for (String value : option.values()) {
+                    if ((count == 1 && option.values().size() > 1) || option.values().size() == 1)//use  only second value
+                        listOptions.add(value);
+                    count++;
+                }
+            }
+        }
+
+        final List<String> spinnerOptions = listOptions;
+
+        if (spinnerOptions.isEmpty())
+            return;
+
+        LinearLayout currentField = new LinearLayout(this);
+
+        //Params
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.topMargin = 8;
+        params.bottomMargin = 8;
+
+        currentField.setLayoutParams(params);
+        currentField.setOrientation(LinearLayout.VERTICAL);
+
+        TextView spinnerLabel = new TextView(this);
+        spinnerLabel.setText(field.getLabel());
+        //spinnerOptions.add();
+        //Create spinner
+        AutoCompleteTextView autoCompleteField = new AutoCompleteTextView(FormDataActivity.this);
+        autoCompleteField.setId(Integer.parseInt(field.getId()));
+        //Attach adapter to spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(FormDataActivity.this, R.layout.spinner_item, spinnerOptions);
+        autoCompleteField.setAdapter(adapter);
+        autoCompleteField.setLayoutParams(params);
+
+        //Attempt to set default item
+        JsonElement element = postDataObject.get(field.getForm_field());
+
+        if (element != null) {
+            try {
+                String elemValue = element.getAsString();
+                autoCompleteField.setText(elemValue.toString());
+            }catch(Exception ex){
+                Log.e(TAG,field.getForm_field() +" value not set");
+                ex.printStackTrace();
+            }
+        }
+
+        /**
+         * Hook a an item selected handler for that particular input
+         */
+        autoCompleteField.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                /**
+                 * Postions should always be less than list size,else outof range
+                 */
+                if (position < options.size()) {
+                    postDataObject.addProperty(field.getForm_field(), spinnerOptions.get(position));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        currentField.addView(spinnerLabel);
+        currentField.addView(autoCompleteField);
         dynamicFieldsWrapper.addView(currentField);
     }
 
@@ -399,8 +537,15 @@ public class FormDataActivity extends AppCompatActivity {
                 FormFieldType fieldType = AppUtils.InputType(field.getData_type());
 
                 if (fieldType.equals(FormFieldType.TEXT_BASED_FIELD)) {
+
                     EditText textInput = findViewById(Integer.parseInt(field.getId()));
                     postDataObject.addProperty(field.getForm_field(), textInput.getText().toString());
+
+                }else if (fieldType.equals(FormFieldType.TEXT_AUTOCOMPLETE_FIELD)) {
+
+                    AutoCompleteTextView autoCompleteTextView = findViewById(Integer.parseInt(field.getId()));
+                    postDataObject.addProperty(field.getForm_field(), autoCompleteTextView.getText().toString());
+
                 }
 
             }
@@ -450,10 +595,6 @@ public class FormDataActivity extends AppCompatActivity {
         int currentFormIndex = forms.indexOf(selectedForm);
         int lastIndex = forms.size() - 1;
 
-        Log.e(TAG,"forms size: "+forms.size());
-        Log.e(TAG,"forms last: "+lastIndex);
-        Log.e(TAG,"forms last: "+currentFormIndex);
-
 
         //Next btn
         if (hasNextForm) {
@@ -484,7 +625,6 @@ public class FormDataActivity extends AppCompatActivity {
     }
 
     public void onNextClick(View view) {
-
 
         cacheData();
 

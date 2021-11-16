@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.JobsDao;
 import com.moh.ihrisupdatetool.db.entities.JobEntity;
-import com.moh.ihrisupdatetool.repo.remote.IGenericAppRepository;
+import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 
@@ -18,12 +18,12 @@ import javax.inject.Inject;
 
 public class JobsRepository {
 
-    private IGenericAppRepository genericAppRepository;
+    private IAppRemoteCallRepository genericAppRepository;
     private MutableLiveData<List<JobEntity>> jobsResponse;
     private JobsDao jobsDao;
 
     @Inject
-    public JobsRepository(IGenericAppRepository genericAppRepository,JobsDao jobsDao) {
+    public JobsRepository(IAppRemoteCallRepository genericAppRepository, JobsDao jobsDao) {
 
         this.genericAppRepository = genericAppRepository;
         this.jobsResponse = new MutableLiveData<>();

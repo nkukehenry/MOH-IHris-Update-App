@@ -11,6 +11,7 @@ import com.moh.ihrisupdatetool.db.dao.FormFieldsDao;
 import com.moh.ihrisupdatetool.db.dao.FormsDao;
 import com.moh.ihrisupdatetool.db.dao.JobsDao;
 import com.moh.ihrisupdatetool.db.dao.MinistryWorkerDao;
+import com.moh.ihrisupdatetool.db.dao.SessionInfoDao;
 import com.moh.ihrisupdatetool.db.entities.CommunityWorkerEntity;
 import com.moh.ihrisupdatetool.db.entities.DataEntryTemplate;
 import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
@@ -19,6 +20,7 @@ import com.moh.ihrisupdatetool.db.entities.FormEntity;
 import com.moh.ihrisupdatetool.db.entities.FormField;
 import com.moh.ihrisupdatetool.db.entities.JobEntity;
 import com.moh.ihrisupdatetool.db.entities.MinistryWorkerEntity;
+import com.moh.ihrisupdatetool.db.entities.SessionInfoEntity;
 
 @Database(entities = {
          FacilityEntity.class
@@ -29,7 +31,8 @@ import com.moh.ihrisupdatetool.db.entities.MinistryWorkerEntity;
         ,FormEntity.class
         ,FormField.class
         ,DataEntryTemplate.class
-     }, version = 18,exportSchema = false)
+        , SessionInfoEntity.class
+     }, version = 19,exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract FacilitiesDao facilitiesDao();
@@ -40,4 +43,5 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract FormsDao formsDao();
     public abstract  FormFieldsDao formFieldsDao();
     public abstract DataEntryDao dataEntryDao();
+    public abstract SessionInfoDao sessionInfoDao();
 }

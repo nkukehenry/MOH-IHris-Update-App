@@ -16,12 +16,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class GenericAppRepository implements IGenericAppRepository {
+public class AppRemoteCallRepository implements IAppRemoteCallRepository {
 
     private AppApi appApi;
 
     @Inject
-    public GenericAppRepository(AppApi appApi) {
+    public AppRemoteCallRepository(AppApi appApi) {
         this.appApi = appApi;
     }
 
