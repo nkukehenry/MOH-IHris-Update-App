@@ -64,8 +64,7 @@ public class MainActivity extends AppCompatActivity {
                if (!submissionResponse.get("state").getAsBoolean())
                    msg = "There wasn't any unsynchronized data";
 
-               uiHelper.hideLoader();
-               uiHelper.showDialog(msg);
+               Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 
            }catch (Exception ex){
                ex.printStackTrace();
@@ -101,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

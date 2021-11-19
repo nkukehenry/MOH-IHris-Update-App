@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +23,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.basgeekball.awesomevalidation.AwesomeValidation;
+import com.basgeekball.awesomevalidation.utility.RegexTemplate;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.common.collect.Range;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -35,16 +39,25 @@ import com.moh.ihrisupdatetool.db.entities.MinistryWorkerEntity;
 import com.moh.ihrisupdatetool.dto.FormFieldType;
 import com.moh.ihrisupdatetool.utils.AppData;
 import com.moh.ihrisupdatetool.utils.AppUtils;
+import com.moh.ihrisupdatetool.utils.AwesomeCustomValidators;
 import com.moh.ihrisupdatetool.utils.UIHelper;
 import com.moh.ihrisupdatetool.viewmodels.FormsViewModel;
 import com.moh.ihrisupdatetool.viewmodels.SubmissionViewModel;
+import com.tsongkha.spinnerdatepicker.DatePickerDialog;
+import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -70,11 +83,18 @@ public class FormDataActivity extends AppCompatActivity {
     private CommunityWorkerEntity selectedCommWorker;
     private MinistryWorkerEntity selectedMinWorker;
     private int exitCounter=0;
+    private SimpleDateFormat simpleDateFormat;
+
+    @Inject
+    AwesomeValidation awesomeValidation;
+    @Inject
+    AwesomeCustomValidators customValidators;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         uiHelper = new UIHelper(this);
+        simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd ", Locale.US);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_fields);
@@ -95,7 +115,7 @@ public class FormDataActivity extends AppCompatActivity {
 
         nextFormButton = findViewById(R.id.nextFormBtn);
         prevFormButton = findViewById(R.id.previousFormBtn);
-        formNavigator = findViewById(R.id.formNavigator);
+        formNavigator  = findViewById(R.id.formNavigator);
         dynamicFieldsWrapper = findViewById(R.id.dynamicFieldsWrapper);
         formTitle = findViewById(R.id.formTitle);
 
@@ -117,6 +137,7 @@ public class FormDataActivity extends AppCompatActivity {
         initObservers();
         getFormFields();
     }
+
 
     private void prefillHealthWorkerValues() {
 
@@ -161,54 +182,65 @@ public class FormDataActivity extends AppCompatActivity {
 
     }
 
+
     private void initObservers() {
 
         formsViewModel.observerFormFieldsResponse().observe(this, formsFieldsResponse -> {
 
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    uiHelper.hideLoader();
-                }
-            }, 1000);
-
-
-            prefillHealthWorkerValues();//attempt to populate worker's info
-
             dynamicFieldsWrapper.removeAllViews();
-            formFields = formsFieldsResponse;
-            submitBtn.setEnabled(false);
-            formTitle.setText(selectedForm.getForm_title());
+            System.out.println(formsFieldsResponse);
 
-            try {
-                for (FormField field : formsFieldsResponse) {
+            if(formsFieldsResponse!=null && !formsFieldsResponse.isEmpty()) {
 
-                    FormFieldType fieldType = AppUtils.InputType(field.getData_type());
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            uiHelper.hideLoader();
+                        }
+                    }, 1000);
 
-                    switch (fieldType) {
-                        case SPINNER_BASED_FIELD:
-                            renderSpinnerBasedField(field);
-                            break;
-                        case IMAGE_FIELD:
-                            renderImageField(field);
-                            break;
-                        case TEXT_AUTOCOMPLETE_FIELD:
-                            renderTextAutoCompleteField(field);
-                            break;
-                        default:
-                            renderTextBasedField(field);
-                            break;
+                    prefillHealthWorkerValues();//attempt to populate worker's info
+
+                    formFields = formsFieldsResponse;
+                    submitBtn.setEnabled(false);
+                    formTitle.setText(selectedForm.getForm_title());
+
+                    try {
+                        for (FormField field : formsFieldsResponse) {
+
+                            FormFieldType fieldType = AppUtils.InputType(field.getData_type());
+
+                            if (!field.getIs_visible()) return;
+
+                            switch (fieldType) {
+                                case SPINNER_BASED_FIELD:
+                                    renderSpinnerBasedField(field);
+                                    break;
+                                case DATE_FIELD:
+                                    renderDateField(field);
+                                    break;
+                                case IMAGE_FIELD:
+                                    renderImageField(field);
+                                    break;
+                                case TEXT_AUTOCOMPLETE_FIELD:
+                                    renderTextAutoCompleteField(field);
+                                    break;
+                                default:
+                                    renderTextBasedField(field);
+                                    break;
+                            }
+                        }
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    } finally {
+                        if (formsFieldsResponse != null)
+                            updateUIOnNavigation();
                     }
-                }
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }finally {
-                if(formsFieldsResponse!=null)
-                updateUIOnNavigation();
             }
 
         });
+
 
         //submission
         submissionViewModel.observeResonse().observe(this, submissionResponse -> {
@@ -251,8 +283,8 @@ public class FormDataActivity extends AppCompatActivity {
 
         //Input
         final EditText edtPass = new EditText(currentField.getContext());
-        edtPass.setInputType(AppUtils.getInputTypeClass(field.getData_type()));
-        edtPass.setPadding(25, 50, 25, 10);
+        edtPass.setInputType(AppUtils.getInputTypeClass(field.getData_format()));
+        edtPass.setPadding(25, 10, 25, 10);
         edtPass.setTextColor(getResources().getColor(R.color.grey));
         edtPass.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         //edtPass.setHint(field.getLabel());
@@ -276,10 +308,25 @@ public class FormDataActivity extends AppCompatActivity {
 
         View view = new View(this);
         view.setBackgroundColor(getResources().getColor(R.color.grey));
-        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
         currentField.addView(view);
 
         dynamicFieldsWrapper.addView(currentField);
+
+       Integer  lengthConstrait  = field.getDb_constraint();
+
+       Log.e(TAG, "CONSTRAINT:: "+String.valueOf(lengthConstrait));
+
+       System.out.println(field);
+
+        if(field.getData_format().equals( InputType.TYPE_CLASS_TEXT ))
+        awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), "[a-zA-Z\\s]+",R.string.invalid_characters );
+
+        if(field.getIs_required())
+        awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
+        if(lengthConstrait > 0)
+        awesomeValidation.addValidation(this, Integer.parseInt(field.getId()),customValidators.maxLengthValidator(lengthConstrait),R.string.too_short);
+
     }
 
     private void renderImageField(FormField field) {
@@ -429,12 +476,92 @@ public class FormDataActivity extends AppCompatActivity {
 
         View view = new View(this);
         view.setBackgroundColor(getResources().getColor(R.color.grey));
-        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
         currentField.addView(view);
 
 
         dynamicFieldsWrapper.addView(currentField);
     }
+
+    private void renderDateField(FormField field) {
+
+        LinearLayout currentField = new LinearLayout(this);
+
+        //Params
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.topMargin = 8;
+        params.bottomMargin = 8;
+
+        currentField.setLayoutParams(params);
+        currentField.setOrientation(LinearLayout.VERTICAL);
+
+        TextView fieldLabel = new TextView(this);
+        fieldLabel.setText(field.getLabel());
+        //spinnerOptions.add();
+        //Create spinner
+        TextView dateField = new TextView(FormDataActivity.this);
+        dateField.setPadding(25, 10, 25, 10);
+        dateField.setTextColor(getResources().getColor(R.color.grey));
+        dateField.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        //edtPass.setHint(field.getLabel());
+        dateField.setBackgroundColor(0x00000000);
+        dateField.setId(Integer.parseInt(field.getId()));
+        //Attach adapter to spinner
+        dateField.setLayoutParams(params);
+        dateField.setEnabled(false);
+
+        //Attempt to set default item
+        JsonElement element = postDataObject.get(field.getForm_field());
+
+        currentField.addView(fieldLabel);
+        currentField.addView(dateField);
+
+        View dividerView = new View(this);
+        dividerView.setBackgroundColor(getResources().getColor(R.color.grey));
+        dividerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+        currentField.addView(dividerView);
+
+        DatePickerDialog.OnDateSetListener callback = (view, year, monthOfYear, dayOfMonth)
+                -> {
+            Log.e(TAG, String.valueOf(year));
+            Log.e(TAG, String.valueOf(monthOfYear));
+
+            Calendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth);
+            String dateData = simpleDateFormat.format(calendar.getTime());
+
+           // String dateData = String.format("%s%s%s%s%s",year,"/", monthOfYear,"/",dayOfMonth);
+            postDataObject.addProperty(field.getForm_field(),dateData);
+            dateField.setText(dateData);
+        };
+
+        DatePickerDialog datePicker =  new SpinnerDatePickerDialogBuilder()
+                .context(this)
+                .callback(callback)
+                //.spinnerTheme(R.style.NumberPickerStyle)
+                .showTitle(true)
+                .showDaySpinner(true)
+                //.defaultDate(1990, 0, 1)
+                //.maxDate(2021, 0, 1)
+                // .minDate(2000, 0, 1)
+                .build();
+
+
+        currentField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                datePicker.show();
+            }
+        });
+
+        dynamicFieldsWrapper.addView(currentField);
+
+        if(field.getIs_required())
+        awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
+
+    }
+
 
     private void renderTextAutoCompleteField(FormField field) {
 
@@ -527,6 +654,8 @@ public class FormDataActivity extends AppCompatActivity {
         currentField.addView(spinnerLabel);
         currentField.addView(autoCompleteField);
         dynamicFieldsWrapper.addView(currentField);
+        awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
+
     }
 
     private void preparePostData() {
@@ -539,11 +668,13 @@ public class FormDataActivity extends AppCompatActivity {
                 if (fieldType.equals(FormFieldType.TEXT_BASED_FIELD)) {
 
                     EditText textInput = findViewById(Integer.parseInt(field.getId()));
+                    if(textInput!=null)
                     postDataObject.addProperty(field.getForm_field(), textInput.getText().toString());
 
                 }else if (fieldType.equals(FormFieldType.TEXT_AUTOCOMPLETE_FIELD)) {
 
                     AutoCompleteTextView autoCompleteTextView = findViewById(Integer.parseInt(field.getId()));
+                    if(autoCompleteTextView!=null)
                     postDataObject.addProperty(field.getForm_field(), autoCompleteTextView.getText().toString());
 
                 }
@@ -620,11 +751,14 @@ public class FormDataActivity extends AppCompatActivity {
     }
 
     private void onSubmitClicked() {
+        if (!awesomeValidation.validate()) return;
         preparePostData();
         submissionViewModel.postData(postDataObject);
     }
 
     public void onNextClick(View view) {
+
+       if (!awesomeValidation.validate()) return;
 
         cacheData();
 
@@ -648,7 +782,7 @@ public class FormDataActivity extends AppCompatActivity {
         cacheData();
 
         List<FormEntity> forms = AppData.allForms;
-        int currentFormIndex = forms.indexOf(selectedForm);
+        int currentFormIndex   = forms.indexOf(selectedForm);
 
         int index = currentFormIndex - 1;
 

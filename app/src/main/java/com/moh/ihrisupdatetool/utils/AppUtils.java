@@ -29,8 +29,7 @@ public class AppUtils {
 
     public static String formatAmount(Double amount){
         DecimalFormat formatter = new DecimalFormat("#,###,###");
-        String formatedAmount = formatter.format(amount);
-        return formatedAmount;
+        return formatter.format(amount);
     }
 
     public static String bitmapTobase64(Bitmap bm) {
@@ -46,8 +45,9 @@ public class AppUtils {
 
         switch (remoteType){
             case "date":
-                return InputType.TYPE_CLASS_DATETIME;
+                return InputType.TYPE_DATETIME_VARIATION_DATE;
             case "number":
+            case "numeric":
                 return InputType.TYPE_CLASS_NUMBER;
             case "decimal":
                 return InputType.TYPE_NUMBER_FLAG_DECIMAL;
@@ -60,20 +60,23 @@ public class AppUtils {
         }
     }
 
+
     public static FormFieldType InputType(String fieldType){
 
         switch (fieldType){
             case "phone":
             case "decimal":
             case "number":
-            case "date":
             case "email":
                 return FormFieldType.TEXT_BASED_FIELD;
+
+            case "date":
+                return FormFieldType.DATE_FIELD;
             case "charmap":
                 return FormFieldType.TEXT_AUTOCOMPLETE_FIELD;
             case "blob":
                 return FormFieldType.IMAGE_FIELD;
-            case "map":
+            case "varcharmap":
                 return FormFieldType.SPINNER_BASED_FIELD;
         }
         return FormFieldType.TEXT_BASED_FIELD;
@@ -83,8 +86,7 @@ public class AppUtils {
     public static String getRandomString(int len)
     {
         Random random = new Random();
-        String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijk"
-                +"lmnopqrstuvwxyz";
+        String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         Random rnd = new Random();
         StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++)

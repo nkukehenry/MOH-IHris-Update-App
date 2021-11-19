@@ -40,22 +40,24 @@ public class DataSubmissionRepository {
 
     public Boolean syncData(){
 
-        dataEntryDao.getLocalRecords().observeForever(new Observer<List<DataEntryTemplate>>() {
-            @Override
-            public void onChanged(List<DataEntryTemplate> records) {
+        dataEntryDao.getLocalRecords().observeForever(records -> {
 
-                   JsonObject resp = new JsonObject();
-                    if( !records.isEmpty() ) {
-                        for (DataEntryTemplate record :records) {
+               JsonObject resp = new JsonObject();
+
+                if( !records.isEmpty() ) {
+
+                    for (DataEntryTemplate record :records) {
+
+                        if(record.getStatus()==0)
                             postData(record.getFormdata());
-                            resp.addProperty("state",true);
-                            resp.addProperty("isUploaded",true);
-                        }
-                    }else{
-                        resp.addProperty("state",false);
+                        resp.addProperty("state",true);
+                        resp.addProperty("isUploaded",true);
                     }
-                submissionResponse.postValue(resp);
-            }
+
+                }else{
+                    resp.addProperty("state",false);
+                }
+            submissionResponse.postValue(resp);
         });
         return true;
     }

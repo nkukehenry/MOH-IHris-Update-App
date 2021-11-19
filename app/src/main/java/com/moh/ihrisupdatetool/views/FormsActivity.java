@@ -49,7 +49,6 @@ public class FormsActivity extends AppCompatActivity {
         uiHelper.showLoader();
 
         formsViewModel.observerResponse().observe(this, formsResponse -> {
-            uiHelper.hideLoader();
 
             if (formsResponse != null) {
 
@@ -58,13 +57,26 @@ public class FormsActivity extends AppCompatActivity {
                 }
                 AppData.allForms = forms;
 
+                preloadAllForms();
+
                 FormsAdapter formsAdapter = new FormsAdapter(formsResponse, this);
                 formsRecycler.setAdapter(formsAdapter);
             }
 
+            uiHelper.hideLoader();
+
+
         });
 
         formsViewModel.getForms();
+    }
+
+    private void preloadAllForms(){
+
+        for(FormEntity form : AppData.allForms){
+            formsViewModel.getFormFields(form.getId());
+        }
+
     }
 
     @Override

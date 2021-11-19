@@ -26,7 +26,7 @@ public class UIHelper {
         dialog = new Dialog(context);
         dialog.setCancelable(false);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
     }
 
     public  void showLoader(){

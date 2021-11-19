@@ -21,7 +21,7 @@ public interface FormFieldsDao {
     LiveData<List<FormField>> getAllFormFields();
 
     @Query("SELECT * FROM form_fields WHERE form_id =:formId")
-    LiveData<List<FormField>> getAllFormByForm(Integer formId);
+    LiveData<List<FormField>> getAllFormByFormId(Integer formId);
 
     @Query("DELETE FROM form_fields")
     void deleteAll();

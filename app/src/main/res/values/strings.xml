@@ -9,4 +9,7 @@
     <string name="login_here">LOGIN HERE</string>
     <string name="enter_user_code">ENTER USER CODE</string>
     <string name="login">LOGIN</string>
+    <string name="not_empty">This filed is required</string>
+    <string name="too_short">Input value too short </string>
+    <string name="invalid_characters">Invalid character input </string>
 </resources>

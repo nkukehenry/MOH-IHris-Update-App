@@ -5,6 +5,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
+import com.google.gson.annotations.SerializedName;
 import com.moh.ihrisupdatetool.db.typeconverters.MapConverter;
 
 import java.util.Map;
@@ -23,6 +24,10 @@ public class FormField {
     //@TypeConverters(MapConverter.class)
     private String default_data;
     private String data_type;
+    private Boolean is_required;
+    private Boolean is_visible;
+    private Integer db_constraint;
+    private String  data_format;
 
     @NonNull
     public String getId() {
@@ -81,6 +86,38 @@ public class FormField {
         this.default_data = default_data;
     }
 
+    public Boolean getIs_required() {
+        return is_required;
+    }
+
+    public void setIs_required(Boolean is_required) {
+        this.is_required = is_required;
+    }
+
+    public Boolean getIs_visible() {
+        return is_visible;
+    }
+
+    public void setIs_visible(Boolean is_visible) {
+        this.is_visible = is_visible;
+    }
+
+    public Integer getDb_constraint() {
+        return db_constraint;
+    }
+
+    public void setDb_constraint(Integer db_constraint) {
+        this.db_constraint = db_constraint;
+    }
+
+    public String getData_format() {
+        return data_format;
+    }
+
+    public void setData_format(String data_format) {
+        this.data_format = data_format;
+    }
+
     @Override
     public String toString() {
         return "FormField{" +
@@ -91,6 +128,9 @@ public class FormField {
                 ", label='" + label + '\'' +
                 ", default_data='" + default_data + '\'' +
                 ", data_type='" + data_type + '\'' +
+                ", is_required=" + is_required +
+                ", is_visible=" + is_visible +
+                ", db_constraint=" + db_constraint +
                 '}';
     }
 }

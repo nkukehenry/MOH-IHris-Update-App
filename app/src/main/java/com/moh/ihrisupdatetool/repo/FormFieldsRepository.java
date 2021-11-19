@@ -36,11 +36,15 @@ public class FormFieldsRepository {
 
     public void fetchFormFields(Integer formId){
 
-        formFieldsDoa.getAllFormByForm(formId).observeForever(o->{
+        formFieldsDoa.getAllFormByFormId(formId).observeForever(o->{
 
-            if(o.isEmpty()){ fetchFromApi(formId); } else {
-                this.formFieldsResponse.postValue(o);
+            if(o.isEmpty()){
+                fetchFromApi(formId);
             }
+            else {
+                this.formFieldsResponse.setValue(o);
+            }
+
         });
 
     }
@@ -49,7 +53,6 @@ public class FormFieldsRepository {
 
         genericAppRepository.get(AppConstants.GET_FORM_FIELDS_URL(formId) ).observeForever(o -> {
 
-            System.out.println(o);
 
             if(o != null){
                 //convert response to required type
@@ -57,7 +60,7 @@ public class FormFieldsRepository {
                 List<FormField> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheFormFields(response);
-                this.formFieldsResponse.postValue(response);
+                this.formFieldsResponse.setValue(response);
             }
 
         });
