@@ -14,8 +14,13 @@ import android.widget.Toast;
 import com.moh.ihrisupdatetool.R;
 import com.moh.ihrisupdatetool.utils.AppData;
 import com.moh.ihrisupdatetool.utils.UIHelper;
+import com.moh.ihrisupdatetool.viewmodels.FormsViewModel;
 import com.moh.ihrisupdatetool.viewmodels.SubmissionViewModel;
 import com.moh.ihrisupdatetool.viewmodels.WorkersViewModel;
+
+import java.util.Observable;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -24,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private WorkersViewModel workersViewModel;
     private SubmissionViewModel submissionViewModel;
+    private FormsViewModel formsViewModel;
     private UIHelper uiHelper;
     private int exitCounter;
 
@@ -35,8 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         workersViewModel    = new ViewModelProvider(this).get(WorkersViewModel.class);
         submissionViewModel = new ViewModelProvider(this).get(SubmissionViewModel.class);
-
-        syncingResponseObserver();
+        formsViewModel      = new ViewModelProvider(this).get(FormsViewModel.class);
 
     }
 
@@ -54,45 +59,62 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    private void syncingResponseObserver(){
+    private void syncData() {
         //submission
-        submissionViewModel.observeResonse().observe( this,submissionResponse->{
+        submissionViewModel.syncData().observe(this, submissionResponse -> {
+             uiHelper.hideLoader();
+            try {
+                String msg = "Sync finished successfully";
 
-           try {
-               String msg = "Sync finished successfully";
+                if (!submissionResponse.get("state").getAsBoolean())
+                    msg = "There wasn't any unsynchronized data";
 
-               if (!submissionResponse.get("state").getAsBoolean())
-                   msg = "There wasn't any unsynchronized data";
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 
-               Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
 
-           }catch (Exception ex){
-               ex.printStackTrace();
-           }
-
-        });
-
-        //workers observer
-        workersViewModel.observeMinistryWorkers().observe( this,submissionResponse->{
-            String msg = "Sync finished successfully";
-            uiHelper.hideLoader();
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         });
     }
 
+
     private void syncCollectedLocalData(){
         uiHelper.showLoader("Synchronizing data...");
-        try {
-            submissionViewModel.syncData();
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
+                try {
+                    syncData();
+                }catch(Exception ex){
+                    ex.printStackTrace();
+                }
     }
 
     private void syncResources(){
         uiHelper.showLoader("Synchronizing resources...");
-        workersViewModel.getCommunityHealthWorkers();
-        workersViewModel.getMinistryHealthWorkers();
+
+                //comm workers
+                workersViewModel.syncCommunityHealthWorkers().observe(MainActivity.this, resp -> {
+
+                    //ministry workers
+                    workersViewModel.syncMinistryHealthWorkers().observe(MainActivity.this, submissionResponse -> {
+
+                            //forms
+                        formsViewModel.syncForms().observe(MainActivity.this,rp->{
+
+                            //fields
+                            formsViewModel.deleteFields();
+
+                            String msg = "Sync finished successfully, check your forms before exiting";
+                            uiHelper.hideLoader();
+                            Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+
+                        } );
+
+                       });
+                    ;
+
+                });
+
+
     }
 
     public void goToHistory() {
@@ -100,8 +122,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

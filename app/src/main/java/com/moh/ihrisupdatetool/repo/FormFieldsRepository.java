@@ -2,10 +2,13 @@ package com.moh.ihrisupdatetool.repo;
 
 import android.os.AsyncTask;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.FormFieldsDao;
+import com.moh.ihrisupdatetool.db.dao.FormsDao;
+import com.moh.ihrisupdatetool.db.entities.FormEntity;
 import com.moh.ihrisupdatetool.db.entities.FormField;
 import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
@@ -30,11 +33,11 @@ public class FormFieldsRepository {
 
     }
 
-    public MutableLiveData<List<FormField>> observerResponse(){
-        return formFieldsResponse;
+    public void deleteFields(){
+        new DeleteAsyncTask(formFieldsDoa).execute();
     }
 
-    public void fetchFormFields(Integer formId){
+    public LiveData<List<FormField>> fetchFormFields(Integer formId){
 
         formFieldsDoa.getAllFormByFormId(formId).observeForever(o->{
 
@@ -46,13 +49,12 @@ public class FormFieldsRepository {
             }
 
         });
-
+        return formFieldsResponse;
     }
 
     private void  fetchFromApi(Integer formId){
 
         genericAppRepository.get(AppConstants.GET_FORM_FIELDS_URL(formId) ).observeForever(o -> {
-
 
             if(o != null){
                 //convert response to required type
@@ -81,6 +83,19 @@ public class FormFieldsRepository {
         @Override
         protected Void doInBackground(List<FormField>... formFields) {
             formFieldsDao.insert(formFields[0]);
+            return null;
+        }
+    }
+
+    static class DeleteAsyncTask extends AsyncTask<Void, Void, Void> {
+        private FormFieldsDao formsDao;
+
+        public DeleteAsyncTask(FormFieldsDao formsDao) {
+            this.formsDao = formsDao;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            formsDao.deleteAll();
             return null;
         }
     }

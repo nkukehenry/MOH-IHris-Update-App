@@ -2,7 +2,9 @@ package com.moh.ihrisupdatetool.repo;
 
 import android.os.AsyncTask;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.google.gson.reflect.TypeToken;
 import com.moh.ihrisupdatetool.db.dao.CommunityWorkerDao;
@@ -16,52 +18,57 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import static java.lang.Thread.sleep;
+
 public class CommunityWorkerRepository {
 
     private IAppRemoteCallRepository genericAppRepository;
-    private MutableLiveData<List<CommunityWorkerEntity>> communityWorkerResponse;
     private CommunityWorkerDao communitWorkerDao;
+    private MutableLiveData<List<CommunityWorkerEntity>> communityWorkers;
+
 
     @Inject
     public CommunityWorkerRepository(IAppRemoteCallRepository genericAppRepository, CommunityWorkerDao commuityWorkerDao) {
 
         this.genericAppRepository = genericAppRepository;
-        this.communityWorkerResponse = new MutableLiveData<>();
         this.communitWorkerDao = commuityWorkerDao;
+        communityWorkers = new MutableLiveData<>();
     }
-
-    public MutableLiveData<List<CommunityWorkerEntity>> observerResponse(){
-        return communityWorkerResponse;
-    }
-
-    public void fetchCommunityWorkers(){
-
+    public LiveData<List<CommunityWorkerEntity>> fetchCommunityWorkers(Boolean deleteCache){
         fetchFromApi();
-
-//        communitWorkerDao.getCommunityWorkers().observeForever(o->{
-//
-//            if(o.isEmpty()){
-//                //fetchFromApi();
-//                this.communityWorkerResponse.postValue(null);
-//            } else {
-//                this.communityWorkerResponse.postValue(o);
-//            }
-//
-//        });
-
+       return communityWorkers;
     }
 
-    public void searchWorkers(String term,String districtName){
+    public LiveData<List<CommunityWorkerEntity>> fetchCommunityWorkers(){
+
+        communitWorkerDao.getCommunityWorkers().observeForever(workers -> {
+
+            if(workers.isEmpty()){
+                fetchFromApi();
+            }else{
+                communityWorkers.setValue(workers);
+            }
+            communitWorkerDao.getCommunityWorkers().removeObserver(communityWorkerEntities -> {
+                //removed
+            });
+        });
+
+        return communityWorkers;
+    }
+
+    public MutableLiveData<List<CommunityWorkerEntity>>  searchWorkers(String term,String districtName){
+
+        MutableLiveData<List<CommunityWorkerEntity>> workersResult = new MutableLiveData();
 
         communitWorkerDao.searchWorker(term,districtName).observeForever(o->{
             if(o.isEmpty()){
                   //fetchFromApi();
-                this.communityWorkerResponse.postValue(null);
+                workersResult.setValue(null);
                  } else {
-                this.communityWorkerResponse.postValue(o);
+                workersResult.setValue(o);
             }
         });
-
+        return workersResult;
     }
 
 
@@ -74,7 +81,7 @@ public class CommunityWorkerRepository {
                 List<CommunityWorkerEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheWorkers(response);
-                this.communityWorkerResponse.postValue(response);
+                communityWorkers.setValue(response);;
             }
         });
     }
@@ -96,4 +103,20 @@ public class CommunityWorkerRepository {
             return null;
         }
     }
+
+
+    static class DeleteAsyncTask extends AsyncTask<Void, Void, Void> {
+        private CommunityWorkerDao communityWorkerDao;
+
+        public DeleteAsyncTask(CommunityWorkerDao communityWorkerDao) {
+            this.communityWorkerDao = communityWorkerDao;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            communityWorkerDao.deleteAll();
+            return null;
+        }
+    }
+
+
 }

@@ -3,10 +3,13 @@ package com.moh.ihrisupdatetool.repo;
 
 import android.os.AsyncTask;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.reflect.TypeToken;
+import com.moh.ihrisupdatetool.db.dao.CommunityWorkerDao;
 import com.moh.ihrisupdatetool.db.dao.MinistryWorkerDao;
+import com.moh.ihrisupdatetool.db.entities.CommunityWorkerEntity;
 import com.moh.ihrisupdatetool.db.entities.MinistryWorkerEntity;
 import com.moh.ihrisupdatetool.repo.remote.IAppRemoteCallRepository;
 import com.moh.ihrisupdatetool.utils.AppConstants;
@@ -16,6 +19,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import static java.lang.Thread.sleep;
 
 public class MinistryWorkerRepository {
 
@@ -31,39 +36,37 @@ public class MinistryWorkerRepository {
         this.ministryWorkerDao = ministryWorkerDao;
     }
 
-    public MutableLiveData<List<MinistryWorkerEntity>> observerResponse(){
+    public LiveData<List<MinistryWorkerEntity>> fetchMinistryWorkers(Boolean deleteCache){
+
+        fetchFromApi();
         return ministryWorkerResponse;
     }
 
-    public void fetchMinistryWorkers(Boolean truncate) {
-        fetchMinistryWorkers();
+    public LiveData<List<MinistryWorkerEntity>> fetchMinistryWorkers(){
+
+        ministryWorkerDao.getMinistryWorkers().observeForever(o->{
+
+            if(o.isEmpty()){ fetchFromApi(); } else {
+                this.ministryWorkerResponse.setValue(o);
+            }
+        });
+        return ministryWorkerResponse;
     }
 
-    public void fetchMinistryWorkers(){
+    public LiveData<List<MinistryWorkerEntity>> searchWorkers(String term,String districtName){
 
-        fetchFromApi();
-
-//        ministryWorkerDao.getMinistryWorkers().observeForever(o->{
-//
-//            if(o.isEmpty()){ fetchFromApi(); } else {
-//                this.ministryWorkerResponse.postValue(o);
-//            }
-//
-//        });
-
-    }
-
-    public void searchWorkers(String term,String districtName){
+        MutableLiveData<List<MinistryWorkerEntity>> workers = new MutableLiveData();
 
         ministryWorkerDao.searchWorker(term,districtName).observeForever(o->{
             if(o.isEmpty()){
                 //fetchFromApi();
-                this.ministryWorkerResponse.postValue(null);
+                workers.setValue(null);
             } else {
-                this.ministryWorkerResponse.postValue(o);
+                workers.setValue(o);
             }
         });
 
+        return workers;
     }
 
 
@@ -76,13 +79,12 @@ public class MinistryWorkerRepository {
                 List<MinistryWorkerEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheWorkers(response);
-                this.ministryWorkerResponse.postValue(response);
+                this.ministryWorkerResponse.setValue(response);
             }
         });
     }
 
     private void  cacheWorkers(List<MinistryWorkerEntity> workers){
-        System.out.println(workers);
         new MinistryWorkerRepository.InsetAsyncTask(ministryWorkerDao).execute(workers);
     }
 
@@ -95,6 +97,19 @@ public class MinistryWorkerRepository {
         @Override
         protected Void doInBackground(List<MinistryWorkerEntity>... workers) {
             minWorkerDao.insert(workers[0]);
+            return null;
+        }
+    }
+
+    static class DeleteAsyncTask extends AsyncTask<Void, Void, Void> {
+        private MinistryWorkerDao ministryWorkerDao;
+
+        public DeleteAsyncTask(MinistryWorkerDao ministryWorkerDao) {
+            this.ministryWorkerDao = ministryWorkerDao;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ministryWorkerDao.deleteAll();
             return null;
         }
     }

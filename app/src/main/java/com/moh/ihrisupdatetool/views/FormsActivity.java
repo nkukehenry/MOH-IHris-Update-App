@@ -48,7 +48,7 @@ public class FormsActivity extends AppCompatActivity {
 
         uiHelper.showLoader();
 
-        formsViewModel.observerResponse().observe(this, formsResponse -> {
+        formsViewModel.getForms().observe(this, formsResponse -> {
 
             if (formsResponse != null) {
 
@@ -63,12 +63,7 @@ public class FormsActivity extends AppCompatActivity {
                 formsRecycler.setAdapter(formsAdapter);
             }
 
-            uiHelper.hideLoader();
-
-
         });
-
-        formsViewModel.getForms();
     }
 
     private void preloadAllForms(){
@@ -77,6 +72,7 @@ public class FormsActivity extends AppCompatActivity {
             formsViewModel.getFormFields(form.getId());
         }
 
+        uiHelper.hideLoader();
     }
 
     @Override

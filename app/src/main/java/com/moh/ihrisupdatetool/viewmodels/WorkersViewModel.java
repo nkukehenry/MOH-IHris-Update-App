@@ -4,6 +4,7 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.moh.ihrisupdatetool.db.entities.CommunityWorkerEntity;
@@ -34,28 +35,28 @@ public class WorkersViewModel extends AndroidViewModel {
         this.ministryWorkerRepository = ministryWorkerRepository;
     }
 
-    public MutableLiveData<List<CommunityWorkerEntity>> observeCommunityWorkers(){
-       return this.communityWorkerRepository.observerResponse();
+
+    public LiveData<List<CommunityWorkerEntity>> syncCommunityHealthWorkers(){
+        return communityWorkerRepository.fetchCommunityWorkers(true);
     }
 
-    public MutableLiveData<List<MinistryWorkerEntity>> observeMinistryWorkers(){
-        return this.ministryWorkerRepository.observerResponse();
+    public LiveData<List<MinistryWorkerEntity>> syncMinistryHealthWorkers(){
+        return ministryWorkerRepository.fetchMinistryWorkers(true);
     }
 
-    public void getCommunityHealthWorkers(){
-        communityWorkerRepository.fetchCommunityWorkers();
+    public LiveData<List<CommunityWorkerEntity>> getCommunityHealthWorkers(){
+       return communityWorkerRepository.fetchCommunityWorkers();
     }
 
-    public void getMinistryHealthWorkers(){
-        ministryWorkerRepository.fetchMinistryWorkers();
+    public LiveData<List<MinistryWorkerEntity>> getMinistryHealthWorkers(){
+        return ministryWorkerRepository.fetchMinistryWorkers();
     }
 
-    public void searchWorker(String term,String districtName,Boolean isCommunity) {
+    public LiveData<List<MinistryWorkerEntity>> searchMinistryWorker(String term,String districtName) {
+            return ministryWorkerRepository.searchWorkers(term, districtName);
+    }
 
-        if(isCommunity) {
-            communityWorkerRepository.searchWorkers(term, districtName);
-        }else{
-            ministryWorkerRepository.searchWorkers(term, districtName);
-        }
+    public LiveData<List<CommunityWorkerEntity>>  searchCommunityWorker(String term,String districtName) {
+            return communityWorkerRepository.searchWorkers(term, districtName);
     }
 }

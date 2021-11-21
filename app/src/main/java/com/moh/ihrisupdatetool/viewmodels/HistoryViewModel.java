@@ -4,6 +4,7 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.moh.ihrisupdatetool.db.entities.DataEntryTemplate;
@@ -28,12 +29,9 @@ public class HistoryViewModel extends AndroidViewModel {
         this.historyRepository = historyRepository;
     }
 
-    public MutableLiveData<List<DataEntryTemplate>> observeHistoryData(){
-        return this.historyRepository.observeHistoryData();
-    }
 
-    public void getAllData(){
-        this.historyRepository.getAllHistory();
+    public LiveData<List<DataEntryTemplate>> getAllData(){
+        return historyRepository.getAllHistory();
     }
 
 }

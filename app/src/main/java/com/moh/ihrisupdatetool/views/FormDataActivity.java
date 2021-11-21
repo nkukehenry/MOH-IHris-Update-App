@@ -61,6 +61,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+import static com.basgeekball.awesomevalidation.ValidationStyle.BASIC;
 import static com.moh.ihrisupdatetool.utils.AppConstants.SELECTED_FORM;
 
 @AndroidEntryPoint
@@ -85,8 +86,10 @@ public class FormDataActivity extends AppCompatActivity {
     private int exitCounter=0;
     private SimpleDateFormat simpleDateFormat;
 
-    @Inject
-    AwesomeValidation awesomeValidation;
+    //@Inject
+
+    private AwesomeValidation awesomeValidation;
+
     @Inject
     AwesomeCustomValidators customValidators;
 
@@ -134,14 +137,12 @@ public class FormDataActivity extends AppCompatActivity {
             onSubmitClicked();
         });
 
-        initObservers();
         getFormFields();
     }
 
-
     private void prefillHealthWorkerValues() {
 
-        //worker Type is per selection on mainactivity
+        //worker Type is as per selection on mainactivity
         String workerType = (AppData.isCommunityWorker)?"chw":"mhw";
         postDataObject.addProperty("hw_type",workerType);
 
@@ -182,85 +183,68 @@ public class FormDataActivity extends AppCompatActivity {
 
     }
 
-
-    private void initObservers() {
-
-        formsViewModel.observerFormFieldsResponse().observe(this, formsFieldsResponse -> {
-
-            dynamicFieldsWrapper.removeAllViews();
-            System.out.println(formsFieldsResponse);
-
-            if(formsFieldsResponse!=null && !formsFieldsResponse.isEmpty()) {
-
-                    new Timer().schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            uiHelper.hideLoader();
-                        }
-                    }, 1000);
-
-                    prefillHealthWorkerValues();//attempt to populate worker's info
-
-                    formFields = formsFieldsResponse;
-                    submitBtn.setEnabled(false);
-                    formTitle.setText(selectedForm.getForm_title());
-
-                    try {
-                        for (FormField field : formsFieldsResponse) {
-
-                            FormFieldType fieldType = AppUtils.InputType(field.getData_type());
-
-                            if (!field.getIs_visible()) return;
-
-                            switch (fieldType) {
-                                case SPINNER_BASED_FIELD:
-                                    renderSpinnerBasedField(field);
-                                    break;
-                                case DATE_FIELD:
-                                    renderDateField(field);
-                                    break;
-                                case IMAGE_FIELD:
-                                    renderImageField(field);
-                                    break;
-                                case TEXT_AUTOCOMPLETE_FIELD:
-                                    renderTextAutoCompleteField(field);
-                                    break;
-                                default:
-                                    renderTextBasedField(field);
-                                    break;
-                            }
-                        }
-
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    } finally {
-                        if (formsFieldsResponse != null)
-                            updateUIOnNavigation();
-                    }
-            }
-
-        });
-
-
-        //submission
-        submissionViewModel.observeResonse().observe(this, submissionResponse -> {
-            try {
-                uiHelper.hideLoader();
-                uiHelper.showDialog("Entry finished successfully");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            } finally {
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-
-        });
-    }
-
     private void getFormFields() {
+
+        awesomeValidation = null;
+
         uiHelper.showLoader();
-        formsViewModel.getFormFields(selectedForm.getId());
+        formsViewModel.getFormFields(selectedForm.getId()).observe(this, formsFieldsResponse -> {
+
+                    dynamicFieldsWrapper.removeAllViews();
+
+                    if(formsFieldsResponse!=null && !formsFieldsResponse.isEmpty()) {
+
+                        new Timer().schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                uiHelper.hideLoader();
+                            }
+                        }, 1000);
+
+                        prefillHealthWorkerValues();//attempt to populate worker's info
+
+                        //instantiate awesome again
+                        awesomeValidation = new AwesomeValidation(BASIC);
+
+                        formFields = formsFieldsResponse;
+                        submitBtn.setEnabled(false);
+                        formTitle.setText(selectedForm.getForm_title());
+
+                        try {
+                            for (FormField field : formsFieldsResponse) {
+
+                                FormFieldType fieldType = AppUtils.InputType(field.getData_type());
+
+                                if (!field.getIs_visible()) return;
+
+                                switch (fieldType) {
+                                    case SPINNER_BASED_FIELD:
+                                        renderSpinnerBasedField(field);
+                                        break;
+                                    case DATE_FIELD:
+                                        renderDateField(field);
+                                        break;
+                                    case IMAGE_FIELD:
+                                        renderImageField(field);
+                                        break;
+                                    case TEXT_AUTOCOMPLETE_FIELD:
+                                        renderTextAutoCompleteField(field);
+                                        break;
+                                    default:
+                                        renderTextBasedField(field);
+                                        break;
+                                }
+                            }
+
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        } finally {
+                            if (formsFieldsResponse != null)
+                                updateUIOnNavigation();
+                        }
+                    }
+
+                });
     }
 
     private void renderTextBasedField(FormField field) {
@@ -287,7 +271,7 @@ public class FormDataActivity extends AppCompatActivity {
         edtPass.setPadding(25, 10, 25, 10);
         edtPass.setTextColor(getResources().getColor(R.color.grey));
         edtPass.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        //edtPass.setHint(field.getLabel());
+        edtPass.setEnabled(!field.getIs_disabled());
         edtPass.setBackgroundColor(0x00000000);
         edtPass.setId(Integer.parseInt(field.getId()));
 
@@ -315,15 +299,14 @@ public class FormDataActivity extends AppCompatActivity {
 
        Integer  lengthConstrait  = field.getDb_constraint();
 
-       Log.e(TAG, "CONSTRAINT:: "+String.valueOf(lengthConstrait));
-
-       System.out.println(field);
+        if(field.getIs_disabled()) return; // is disabled, don't valdiate anything on it
 
         if(field.getData_format().equals( InputType.TYPE_CLASS_TEXT ))
         awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), "[a-zA-Z\\s]+",R.string.invalid_characters );
 
         if(field.getIs_required())
         awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
+
         if(lengthConstrait > 0)
         awesomeValidation.addValidation(this, Integer.parseInt(field.getId()),customValidators.maxLengthValidator(lengthConstrait),R.string.too_short);
 
@@ -344,7 +327,7 @@ public class FormDataActivity extends AppCompatActivity {
         //Input
         final TextView imageHolder = new TextView(currentField.getContext());
 
-        imageHolder.setPadding(25, 25, 25, 25);
+        imageHolder.setPadding(25, 25, 25, 35);
         imageHolder.setTextColor(getResources().getColor(R.color.grey));
         imageHolder.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         imageHolder.setBackgroundColor(0x00000000);
@@ -699,6 +682,8 @@ public class FormDataActivity extends AppCompatActivity {
 
             try {
 
+                System.out.println( data.getExtras() );
+
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
 
                 ImageView imageView = findViewById(Integer.parseInt(currentImageField.getId()) * 300);
@@ -751,14 +736,30 @@ public class FormDataActivity extends AppCompatActivity {
     }
 
     private void onSubmitClicked() {
+
         if (!awesomeValidation.validate()) return;
+
         preparePostData();
-        submissionViewModel.postData(postDataObject);
+        uiHelper.showLoader("Submitting data...");
+        submissionViewModel.postData(postDataObject).observe(this, submissionResponse -> {
+            try {
+                uiHelper.hideLoader();
+
+                Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_LONG).show();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+        });
     }
 
     public void onNextClick(View view) {
 
-       if (!awesomeValidation.validate()) return;
+      if (!awesomeValidation.validate()) return;
 
         cacheData();
 
@@ -778,6 +779,8 @@ public class FormDataActivity extends AppCompatActivity {
     }
 
     public void onPrevClick(View view) {
+
+        if (!awesomeValidation.validate()) return;
 
         cacheData();
 

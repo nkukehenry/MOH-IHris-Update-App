@@ -1,5 +1,6 @@
 package com.moh.ihrisupdatetool.repo;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.moh.ihrisupdatetool.db.dao.DataEntryDao;
@@ -20,14 +21,8 @@ public class HistoryRepository {
         this.dataEntryDao  = dataEntryDao;
     }
 
-    public MutableLiveData<List<DataEntryTemplate>> observeHistoryData(){
-        return historyResponse;
-    }
-
-    public void getAllHistory(){
-        dataEntryDao.getAllFormData().observeForever(o->{
-                this.historyResponse.postValue(o);
-        });
+    public LiveData<List<DataEntryTemplate>> getAllHistory(){
+        return dataEntryDao.getAllFormData();
     }
 
 }

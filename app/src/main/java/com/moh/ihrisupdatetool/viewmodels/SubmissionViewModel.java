@@ -4,6 +4,7 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonObject;
@@ -26,20 +27,20 @@ public class SubmissionViewModel extends AndroidViewModel {
         this.dataSubmissionRepository = dataSubmissionRepository;
     }
 
-    public MutableLiveData<JsonObject> observeResonse(){
-        return dataSubmissionRepository.observerResponse();
-    }
-
-    public void postData(JsonObject postData){
-         dataSubmissionRepository.postData(postData);
+    public LiveData<JsonObject> postData(JsonObject postData){
+        return dataSubmissionRepository.postData(postData);
     }
 
     public void cacheData(JsonObject postData){
         dataSubmissionRepository.cacheFormData(postData,false);
     }
 
-    public Boolean syncData(){
+    public LiveData<JsonObject> syncData(){
         return dataSubmissionRepository.syncData();
+    }
+
+    public Boolean deleteData(){
+        return dataSubmissionRepository.deleteAll();
     }
 
 }

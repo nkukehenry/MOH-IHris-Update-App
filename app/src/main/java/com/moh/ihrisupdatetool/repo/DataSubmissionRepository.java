@@ -2,8 +2,8 @@ package com.moh.ihrisupdatetool.repo;
 
 import android.os.AsyncTask;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -15,31 +15,36 @@ import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 
 import java.lang.reflect.Type;
-import java.util.List;
 
 import javax.inject.Inject;
 
 public class DataSubmissionRepository {
 
     private IAppRemoteCallRepository genericAppRepository;
-    private MutableLiveData<JsonObject> submissionResponse;
     private DataEntryDao dataEntryDao;
 
     @Inject
     public DataSubmissionRepository(IAppRemoteCallRepository genericAppRepository, FormFieldsDao  formsDao, DataEntryDao dataEntryDao) {
-
         this.genericAppRepository = genericAppRepository;
-        this.submissionResponse = new MutableLiveData<>();
         this.dataEntryDao = dataEntryDao;
-
     }
 
-    public MutableLiveData<JsonObject> observerResponse(){
-        return submissionResponse;
+
+    public Boolean deleteAll() {
+            new DeleteAsyncTask(dataEntryDao).execute();
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
-    public Boolean syncData(){
 
+    public LiveData<JsonObject> syncData(){
+
+        MutableLiveData<JsonObject> syncResponse = new MutableLiveData<>();
         dataEntryDao.getLocalRecords().observeForever(records -> {
 
                JsonObject resp = new JsonObject();
@@ -48,8 +53,9 @@ public class DataSubmissionRepository {
 
                     for (DataEntryTemplate record :records) {
 
-                        if(record.getStatus()==0)
+                        if(record.getStatus() == 0)
                             postData(record.getFormdata());
+
                         resp.addProperty("state",true);
                         resp.addProperty("isUploaded",true);
                     }
@@ -57,13 +63,16 @@ public class DataSubmissionRepository {
                 }else{
                     resp.addProperty("state",false);
                 }
-            submissionResponse.postValue(resp);
+            dataEntryDao.getLocalRecords().removeObserver( dataEntryTemplates -> {});
+            syncResponse.setValue(resp);
         });
-        return true;
+
+        return syncResponse;
     }
 
-    public void  postData(JsonObject postData){
+    public LiveData<JsonObject>  postData(JsonObject postData){
 
+        MutableLiveData<JsonObject> submissionResponse = new MutableLiveData<>();
         cacheFormData(postData,false);
 
         genericAppRepository.post(AppConstants.POST_FORM_DATA_URL(),postData).observeForever(o -> {
@@ -73,12 +82,13 @@ public class DataSubmissionRepository {
                 Type genType = new TypeToken<JsonObject>() {}.getType();
                 JsonObject response = AppUtils.objectToType(o,genType);
                 //add values to the observable
-                this.submissionResponse.postValue(response);
+                submissionResponse.setValue(response);
                 //set marked uploaded
                 cacheFormData(postData,true);
             }
 
         });
+        return submissionResponse;
     }
 
 
@@ -103,6 +113,20 @@ public class DataSubmissionRepository {
         @Override
         protected Void doInBackground(DataEntryTemplate... dataEntryTemplates) {
             dataEntryDao.insert(dataEntryTemplates[0]);
+            return null;
+        }
+    }
+
+
+    static class DeleteAsyncTask extends AsyncTask<Void, Void, Void> {
+        private DataEntryDao dataEntryDao;
+
+        public DeleteAsyncTask(DataEntryDao communityWorkerDao) {
+            this.dataEntryDao = communityWorkerDao;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            dataEntryDao.deleteAll();
             return null;
         }
     }

@@ -4,6 +4,7 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.moh.ihrisupdatetool.db.entities.FormEntity;
@@ -37,22 +38,20 @@ public class FormsViewModel extends AndroidViewModel {
         this.formFieldsRepository = formFieldsRepository;
     }
 
-    public MutableLiveData<List<FormEntity>> observerResponse(){
-        return formsRepository.observerResponse();
+    public LiveData<List<FormEntity>> getForms(){
+        return formsRepository.fetchForms();
     }
 
-    public void getForms(){
-        formsRepository.fetchForms();
+    public LiveData<List<FormEntity>> syncForms(){
+        return formsRepository.fetchForms(true);
     }
 
-    //form fields
-
-    public MutableLiveData<List<FormField>> observerFormFieldsResponse(){
-        return formFieldsRepository.observerResponse();
+    public void deleteFields(){
+        formFieldsRepository.deleteFields();
     }
 
-    public void getFormFields(Integer formId){
-        formFieldsRepository.fetchFormFields(formId);
+    public LiveData<List<FormField>> getFormFields(Integer formId){
+        return formFieldsRepository.fetchFormFields(formId);
     }
 
 }

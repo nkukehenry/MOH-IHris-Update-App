@@ -24,14 +24,8 @@ public class AwesomeCustomValidators {
 
     public static  SimpleCustomValidation maxLengthValidator(Integer maxLength)
     {
-        return new SimpleCustomValidation() {
-            @Override
-            public boolean compare(String input) {
-                return (input.length() <= maxLength)?true:false;
-            }
-        };
+        return input -> input.length() <= maxLength;
     }
-
 
 
 }

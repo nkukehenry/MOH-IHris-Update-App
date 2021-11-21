@@ -42,29 +42,14 @@ public class HistoryActivity extends AppCompatActivity {
         historyViewModel = new ViewModelProvider(this).get(HistoryViewModel.class);
         submissionViewModel = new ViewModelProvider(this).get(SubmissionViewModel.class);
 
-        initDataObserver();
         fetchHistory();
 
     }
 
-    private void initDataObserver(){
-        this.historyViewModel.observeHistoryData().observe(this,response->{
-            uiHelper.hideLoader();
-                //bind data to view
-            if(response !=null && !response.isEmpty()) {
-                HistoryListAdapter adapter = new HistoryListAdapter(response, this);
-                historyRecycler.setAdapter(adapter);
-            }
 
-        });
-
-        //observer for if upload is clicked
-        syncingResponseObserver();
-    }
-
-    private void syncingResponseObserver(){
+    private void postSync(){
         //submission
-        submissionViewModel.observeResonse().observe( this,submissionResponse->{
+        submissionViewModel.syncData().observe( this,submissionResponse->{
 
             try {
                 String msg = "Sync finished successfully";
@@ -83,17 +68,33 @@ public class HistoryActivity extends AppCompatActivity {
 
     }
 
+    private void deleteLocalData(){
+        //submission
+        submissionViewModel.syncData();
+
+    }
+
 
     private void fetchHistory(){
         uiHelper.showLoader();
-        this.historyViewModel.getAllData();
+        this.historyViewModel.getAllData().observe(this,response->{
+            uiHelper.hideLoader();
+            //bind data to view
+            if(response !=null && !response.isEmpty()) {
+                HistoryListAdapter adapter = new HistoryListAdapter(response, this);
+                historyRecycler.setAdapter(adapter);
+            }
+
+        });;
     }
 
 
     private void syncCollectedLocalData(){
+
         uiHelper.showLoader("Synchronizing data...");
+
         try {
-            submissionViewModel.syncData();
+            postSync();
         }catch(Exception ex){
             ex.printStackTrace();
         }
@@ -115,11 +116,18 @@ public class HistoryActivity extends AppCompatActivity {
                 syncCollectedLocalData();
                 return true;
             case R.id.delete:
-                Toast.makeText(this, "Delete coming soon", Toast.LENGTH_SHORT).show();
+                deleteCachedRecords();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void deleteCachedRecords(){
+        uiHelper.showLoader("Processing...");
+        this.historyViewModel.getAllData();
+        uiHelper.hideLoader();
+        Toast.makeText(this, "Delete operation started", Toast.LENGTH_SHORT).show();
     }
 
     @Override

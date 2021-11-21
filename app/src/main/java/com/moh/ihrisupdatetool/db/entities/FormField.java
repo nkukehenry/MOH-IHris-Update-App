@@ -21,13 +21,13 @@ public class FormField {
     private String display;
     private String label;
 
-    //@TypeConverters(MapConverter.class)
-    private String default_data;
-    private String data_type;
+    private String  default_data;
+    private String  data_type;
     private Boolean is_required;
     private Boolean is_visible;
     private Integer db_constraint;
     private String  data_format;
+    private Boolean is_disabled;
 
     @NonNull
     public String getId() {
@@ -116,6 +116,14 @@ public class FormField {
 
     public void setData_format(String data_format) {
         this.data_format = data_format;
+    }
+
+    public Boolean getIs_disabled() {
+        return is_disabled;
+    }
+
+    public void setIs_disabled(Boolean is_disabled) {
+        this.is_disabled = is_disabled;
     }
 
     @Override

@@ -65,45 +65,49 @@ public class PersonSearchActivity extends AppCompatActivity {
 
         workersViewModel = new ViewModelProvider(this).get(WorkersViewModel.class);
 
-        //Initilaizes response observers for the search
-        observePersonsResponse();
-
         searchButton.setOnClickListener(v->{
 
             String term = searchTerm.getText().toString();
 
             if(term!=null && !term.isEmpty()) {
+
                 uiHelper.showLoader();
-                workersViewModel.searchWorker(term, selectedDistrict.getDistrictName(), AppData.isCommunityWorker);
-               }
+
+                if ((AppData.isCommunityWorker)) {
+                    searchCommunityWorker(term);
+                } else {
+                    searchMinistryWorker(term);
+                }
+            }
             });
 
 
     }
 
-    private void observePersonsResponse(){
+    private void searchCommunityWorker(String term) {
 
         //community workers observer
-        workersViewModel.observeCommunityWorkers().observe( this,workersResponse->{
+        workersViewModel.searchCommunityWorker(term, selectedDistrict.getDistrictName()).observe(this, workersResponse -> {
 
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        uiHelper.hideLoader();
-                    }
-                }, 1000);
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    uiHelper.hideLoader();
+                }
+            }, 1000);
 
-                if(workersResponse == null) {
-                    Toast.makeText(this, "No records found", Toast.LENGTH_LONG).show();
-                }
-                else if(!workersResponse.isEmpty()) {
-                    CommunityWorkerAdapter formsAdapter = new CommunityWorkerAdapter(workersResponse, this);
-                    comunityWorkerRecycler.setAdapter(formsAdapter);
-                }
+            if (workersResponse == null) {
+                Toast.makeText(this, "No records found", Toast.LENGTH_LONG).show();
+            } else if (!workersResponse.isEmpty()) {
+                CommunityWorkerAdapter formsAdapter = new CommunityWorkerAdapter(workersResponse, this);
+                comunityWorkerRecycler.setAdapter(formsAdapter);
+            }
         });
+    }
 
+    private void searchMinistryWorker(String term) {
         //ministry workers observer
-        workersViewModel.observeMinistryWorkers().observe( this,workersResponse->{
+        workersViewModel.searchMinistryWorker(term, selectedDistrict.getDistrictName()).observe( this,workersResponse->{
 
             new Timer().schedule(new TimerTask() {
                 @Override
@@ -120,9 +124,6 @@ public class PersonSearchActivity extends AppCompatActivity {
                 ministryWorkerRecycler.setAdapter(formsAdapter);
             }
         });
-
-
-
     }
 
     @Override

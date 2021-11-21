@@ -2,6 +2,7 @@ package com.moh.ihrisupdatetool.repo;
 
 import android.os.AsyncTask;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.reflect.TypeToken;
@@ -31,11 +32,12 @@ public class FormsRepository {
 
     }
 
-    public MutableLiveData<List<FormEntity>> observerResponse(){
+    public LiveData<List<FormEntity>> fetchForms(Boolean deleteCache){
+        fetchFromApi();
         return formsResponse;
     }
 
-    public void fetchForms(){
+    public LiveData<List<FormEntity>> fetchForms(){
 
         formsDao.getAllForms().observeForever(o->{
 
@@ -44,6 +46,9 @@ public class FormsRepository {
             }
         });
 
+        formsDao.getAllForms().removeObserver(formEntities -> { });
+
+        return formsResponse;
     }
 
     private void  fetchFromApi(){
@@ -58,7 +63,7 @@ public class FormsRepository {
                 List<FormEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheForms(response);
-                this.formsResponse.postValue(response);
+                this.formsResponse.setValue(response);
             }
 
         });
@@ -82,4 +87,18 @@ public class FormsRepository {
             return null;
         }
     }
+
+    static class DeleteAsyncTask extends AsyncTask<Void, Void, Void> {
+        private FormsDao formsDao;
+
+        public DeleteAsyncTask(FormsDao communityWorkerDao) {
+            this.formsDao = communityWorkerDao;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            formsDao.deleteAll();
+            return null;
+        }
+    }
+
 }
