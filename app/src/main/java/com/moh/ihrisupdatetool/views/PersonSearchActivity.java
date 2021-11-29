@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -138,14 +139,14 @@ public class PersonSearchActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.newRecord:
-                  goToFormWithNewRecord();
+                  goToFormWithNewRecord(new View(this));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void goToFormWithNewRecord() {
+    public void goToFormWithNewRecord(View view) {
         Intent intent = new Intent(this,FormsActivity.class);
         startActivity(intent);
     }

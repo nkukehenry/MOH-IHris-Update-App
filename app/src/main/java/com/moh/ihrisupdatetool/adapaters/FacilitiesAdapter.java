@@ -17,16 +17,19 @@ import com.moh.ihrisupdatetool.views.PersonSearchActivity;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FacilitiesAdapter extends RecyclerView.Adapter<FacilitiesAdapter.FacilityViewHolder> {
 
     List<FacilityEntity> data;
+    List<FacilityEntity> unFilteredData;
     Context context;
     private LayoutInflater inflater;
 
     public FacilitiesAdapter(List<FacilityEntity> data, Context context){
         this.data = data;
+        this.unFilteredData = new ArrayList<>(data);
         this.context = context;
     }
 
@@ -50,6 +53,13 @@ public class FacilitiesAdapter extends RecyclerView.Adapter<FacilitiesAdapter.Fa
     @Override
     public int getItemCount() {
         return data.size();
+    }
+
+    public void filterFacilities(List<FacilityEntity> filteredList) {
+
+          data = filteredList;
+
+          notifyDataSetChanged();
     }
 
     //nested viewholder implementation class

@@ -2,6 +2,7 @@ package com.moh.ihrisupdatetool.adapaters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,22 +11,26 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.moh.ihrisupdatetool.databinding.DistrictListBinding;
 import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
+import com.moh.ihrisupdatetool.db.entities.FacilityEntity;
 import com.moh.ihrisupdatetool.utils.AppData;
 import com.moh.ihrisupdatetool.views.FormsActivity;
 import com.moh.ihrisupdatetool.views.PersonSearchActivity;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DistrictsAdapter extends RecyclerView.Adapter<DistrictsAdapter.DistrictViewHolder> {
 
     List<DistrictEntity> data;
+    List<DistrictEntity> unFilteredData;
     Context context;
     private LayoutInflater inflater;
 
     public DistrictsAdapter(List<DistrictEntity> data, Context context){
         this.data = data;
+        this.unFilteredData = new ArrayList<>(data);
         this.context = context;
     }
 
@@ -49,6 +54,12 @@ public class DistrictsAdapter extends RecyclerView.Adapter<DistrictsAdapter.Dist
     @Override
     public int getItemCount() {
         return data.size();
+    }
+
+    public void filterDistricts(List<DistrictEntity> filteredList) {
+
+        data = filteredList;
+        notifyDataSetChanged();
     }
 
     //nested viewholder implementation class

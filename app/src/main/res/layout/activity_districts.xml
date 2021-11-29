@@ -3,13 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/layout_padding"
     android:background="@color/layoutBackground"
     tools:context=".views.DistrictsActivity">
+
+    <LinearLayout
+        android:paddingHorizontal="@dimen/layout_padding"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/layout_padding">
+
+    <EditText
+        android:id="@+id/districtSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search"
+        android:layout_margin="16dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/districtsRecycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    </LinearLayout>
 
 </ScrollView>

@@ -327,7 +327,7 @@ public class FormDataActivity extends AppCompatActivity {
         //Input
         final TextView imageHolder = new TextView(currentField.getContext());
 
-        imageHolder.setPadding(25, 25, 25, 35);
+        imageHolder.setPadding(25, 10, 25, 10);
         imageHolder.setTextColor(getResources().getColor(R.color.grey));
         imageHolder.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         imageHolder.setBackgroundColor(0x00000000);
@@ -337,7 +337,6 @@ public class FormDataActivity extends AppCompatActivity {
         imageHolder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 dispatchTakePictureIntent(field);
             }
         });
@@ -682,12 +681,10 @@ public class FormDataActivity extends AppCompatActivity {
 
             try {
 
-                System.out.println( data.getExtras() );
-
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
 
                 ImageView imageView = findViewById(Integer.parseInt(currentImageField.getId()) * 300);
-                imageView.setImageBitmap(photo);
+                imageView.setImageBitmap(AppUtils.resizeBitmap(photo));
                 imageView.setVisibility(View.VISIBLE);
 
                 String encodedImage = AppUtils.bitmapTobase64(photo);
@@ -700,7 +697,6 @@ public class FormDataActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
 
         }
     }

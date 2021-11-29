@@ -1,6 +1,7 @@
 package com.moh.ihrisupdatetool.utils;
 
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.text.InputType;
 import android.util.Base64;
 
@@ -92,6 +93,24 @@ public class AppUtils {
         for (int i = 0; i < len; i++)
             sb.append(chars.charAt(rnd.nextInt(chars.length())));
         return sb.toString();
+    }
+
+
+    public static Bitmap resizeBitmap(Bitmap bitmap) {
+
+        int height = bitmap.getHeight();
+        int width = bitmap.getWidth();
+
+        float scaleWidth = ((float) width*4) / width;
+        float scaleHeight = ((float) height*4) / height;
+
+        Matrix matrix = new Matrix();
+        // here we do resize the bitmap
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // and create new one
+        Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, false);
+        return newBitmap;
     }
 
 }
