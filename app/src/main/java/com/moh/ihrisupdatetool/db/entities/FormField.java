@@ -25,9 +25,11 @@ public class FormField {
     private String  data_type;
     private Boolean is_required;
     private Boolean is_visible;
-    private Integer db_constraint;
+    private Integer db_constraint=0;
     private String  data_format;
     private Boolean is_disabled;
+    private Integer max_value;
+    private Integer min_value;
 
     @NonNull
     public String getId() {
@@ -126,6 +128,22 @@ public class FormField {
         this.is_disabled = is_disabled;
     }
 
+    public Integer getMax_value() {
+        return max_value;
+    }
+
+    public void setMax_value(Integer max_value) {
+        this.max_value = max_value;
+    }
+
+    public Integer getMin_value() {
+        return min_value;
+    }
+
+    public void setMin_value(Integer min_value) {
+        this.min_value = min_value;
+    }
+
     @Override
     public String toString() {
         return "FormField{" +
@@ -139,6 +157,10 @@ public class FormField {
                 ", is_required=" + is_required +
                 ", is_visible=" + is_visible +
                 ", db_constraint=" + db_constraint +
+                ", data_format='" + data_format + '\'' +
+                ", is_disabled=" + is_disabled +
+                ", max_value=" + max_value +
+                ", min_value=" + min_value +
                 '}';
     }
 }

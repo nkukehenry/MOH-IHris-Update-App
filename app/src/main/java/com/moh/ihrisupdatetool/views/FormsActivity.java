@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import com.moh.ihrisupdatetool.R;
 import com.moh.ihrisupdatetool.adapaters.FacilitiesAdapter;
@@ -19,6 +20,8 @@ import com.moh.ihrisupdatetool.viewmodels.FormsViewModel;
 import java.util.ArrayList;
 
 import dagger.hilt.android.AndroidEntryPoint;
+
+import static com.moh.ihrisupdatetool.utils.AppConstants.SELECTED_FORM;
 
 @AndroidEntryPoint
 public class FormsActivity extends AppCompatActivity {
@@ -59,8 +62,8 @@ public class FormsActivity extends AppCompatActivity {
 
                 preloadAllForms();
 
-                FormsAdapter formsAdapter = new FormsAdapter(formsResponse, this);
-                formsRecycler.setAdapter(formsAdapter);
+                //FormsAdapter formsAdapter = new FormsAdapter(formsResponse, this);
+               // formsRecycler.setAdapter(formsAdapter);
             }
 
         });
@@ -71,8 +74,17 @@ public class FormsActivity extends AppCompatActivity {
         for(FormEntity form : AppData.allForms){
             formsViewModel.getFormFields(form.getId());
         }
-
         uiHelper.hideLoader();
+
+        showFirstForm(AppData.allForms.get(0));
+    }
+
+    private void showFirstForm(FormEntity selectedForm) {
+        Intent intent = new Intent(this, FormDataActivity.class);
+        intent.putExtra(SELECTED_FORM, selectedForm);
+        AppData.selectedForm = selectedForm;
+        startActivity(intent);
+        finish();
     }
 
     @Override

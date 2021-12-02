@@ -85,6 +85,8 @@ public class FormDataActivity extends AppCompatActivity {
     private MinistryWorkerEntity selectedMinWorker;
     private int exitCounter=0;
     private SimpleDateFormat simpleDateFormat;
+    private List<Integer> imageFields = new ArrayList<>();
+    private List<Integer> formsTracker = new ArrayList<>();
 
     //@Inject
 
@@ -150,8 +152,6 @@ public class FormDataActivity extends AppCompatActivity {
         int currentFormIndex = forms.indexOf(selectedForm);
         int lastIndex = forms.size() - 1;
 
-        Log.e(TAG,"Selected form: " + currentFormIndex);
-
         if(currentFormIndex == 0) {
             prevFormButton.setEnabled(false);
         }
@@ -163,10 +163,9 @@ public class FormDataActivity extends AppCompatActivity {
             prevFormButton.setEnabled(true);
         }
 
-
         if (selectedCommWorker != null) {
 
-            postDataObject.addProperty("surname", selectedCommWorker.getSurname());
+            postDataObject.addProperty("surname",   selectedCommWorker.getSurname());
             postDataObject.addProperty("othername", selectedCommWorker.getOthername());
             postDataObject.addProperty("firstname", selectedCommWorker.getFirstname());
             postDataObject.addProperty("ihris_pid", selectedCommWorker.getPersonId());
@@ -215,7 +214,7 @@ public class FormDataActivity extends AppCompatActivity {
 
                                 FormFieldType fieldType = AppUtils.InputType(field.getData_type());
 
-                                if (!field.getIs_visible()) return;
+                                if (!field.getIs_visible()) continue;
 
                                 switch (fieldType) {
                                     case SPINNER_BASED_FIELD:
@@ -237,6 +236,7 @@ public class FormDataActivity extends AppCompatActivity {
                             }
 
                         } catch (Exception ex) {
+                            Log.e(TAG,"Exception:: "+ex.getMessage());
                             ex.printStackTrace();
                         } finally {
                             if (formsFieldsResponse != null)
@@ -280,10 +280,10 @@ public class FormDataActivity extends AppCompatActivity {
         if (element != null) {
             try {
                 String elemValue = element.getAsString();
-                edtPass.setText(elemValue.toString());
+                edtPass.setText(elemValue);
             }catch(Exception ex){
-                Log.e(TAG,field.getForm_field() +" value not set");
-                ex.printStackTrace();
+               // Log.e(TAG,field.getForm_field() +" value not set");
+                //ex.printStackTrace();
             }
         }
 
@@ -297,7 +297,7 @@ public class FormDataActivity extends AppCompatActivity {
 
         dynamicFieldsWrapper.addView(currentField);
 
-       Integer  lengthConstrait  = field.getDb_constraint();
+        Integer  lengthConstrait  = field.getDb_constraint();
 
         if(field.getIs_disabled()) return; // is disabled, don't valdiate anything on it
 
@@ -313,6 +313,8 @@ public class FormDataActivity extends AppCompatActivity {
     }
 
     private void renderImageField(FormField field) {
+
+
 
         // Create EditText
         TextInputLayout currentField = new TextInputLayout(this);
@@ -333,6 +335,8 @@ public class FormDataActivity extends AppCompatActivity {
         imageHolder.setBackgroundColor(0x00000000);
         imageHolder.setId(Integer.parseInt(field.getId()));
         imageHolder.setText("Choose " + field.getLabel());
+
+        imageFields.add(Integer.parseInt(field.getId())); //track Image fields
 
         imageHolder.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -393,8 +397,7 @@ public class FormDataActivity extends AppCompatActivity {
 
         final List<String> spinnerOptions = listOptions;
 
-        if (spinnerOptions.isEmpty())
-            return;
+        if (spinnerOptions.isEmpty()) return;
 
         LinearLayout currentField = new LinearLayout(this);
 
@@ -423,7 +426,11 @@ public class FormDataActivity extends AppCompatActivity {
 
         if (element != null) {
             try {
+                Log.e(TAG, field.getForm_field() + " value not set");
                 String elemValue = element.getAsString();
+
+                Log.e(TAG, " value :: "+elemValue);
+
                 int selectedValue = adapter.getPosition(elemValue);
                 spinner.setSelection(selectedValue);
             } catch (Exception ex) {
@@ -466,6 +473,8 @@ public class FormDataActivity extends AppCompatActivity {
     }
 
     private void renderDateField(FormField field) {
+
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 
         LinearLayout currentField = new LinearLayout(this);
 
@@ -518,15 +527,18 @@ public class FormDataActivity extends AppCompatActivity {
             dateField.setText(dateData);
         };
 
+        int maxValue = currentYear+field.getMax_value();
+        int minValue = currentYear+field.getMin_value();
+
         DatePickerDialog datePicker =  new SpinnerDatePickerDialogBuilder()
                 .context(this)
                 .callback(callback)
                 //.spinnerTheme(R.style.NumberPickerStyle)
                 .showTitle(true)
                 .showDaySpinner(true)
-                //.defaultDate(1990, 0, 1)
-                //.maxDate(2021, 0, 1)
-                // .minDate(2000, 0, 1)
+                .defaultDate(minValue, 0, 1)
+                .maxDate(maxValue, 11, 1)
+                .minDate(minValue, 0, 1)
                 .build();
 
 
@@ -543,7 +555,6 @@ public class FormDataActivity extends AppCompatActivity {
         awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
 
     }
-
 
     private void renderTextAutoCompleteField(FormField field) {
 
@@ -606,7 +617,7 @@ public class FormDataActivity extends AppCompatActivity {
         if (element != null) {
             try {
                 String elemValue = element.getAsString();
-                autoCompleteField.setText(elemValue.toString());
+                autoCompleteField.setText(elemValue);
             }catch(Exception ex){
                 Log.e(TAG,field.getForm_field() +" value not set");
                 ex.printStackTrace();
@@ -669,7 +680,7 @@ public class FormDataActivity extends AppCompatActivity {
 
     private void cacheData() {
         preparePostData();
-        submissionViewModel.cacheData(postDataObject);
+        //submissionViewModel.cacheData(postDataObject);
     }
 
     @Override
@@ -692,12 +703,22 @@ public class FormDataActivity extends AppCompatActivity {
                 TextView imageLabel = findViewById(Integer.parseInt(currentImageField.getId()));
                 imageLabel.setText(currentImageField.getLabel() + ": Attached Successfully");
 
-                currentImageField = null;
+               //int index = imageFields.indexOf(Integer.parseInt(currentImageField.getId()));
+                //imageFields.remove(index);
+                for(int i=0; i<imageFields.size(); i++){
+                    if( imageFields.get(i) == Integer.parseInt(currentImageField.getId()) )
+                     imageFields.remove(i);
+                    Log.e(TAG, "Image Index "+i);
+                }
+
+
+               Log.e(TAG, "Images  "+imageFields.size());
+
+               currentImageField = null;
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
     }
 
@@ -707,16 +728,15 @@ public class FormDataActivity extends AppCompatActivity {
         int currentFormIndex = forms.indexOf(selectedForm);
         int lastIndex = forms.size() - 1;
 
-
         //Next btn
-        if (hasNextForm) {
+        if (hasNextForm && currentFormIndex != lastIndex) {
             nextFormButton.setEnabled(true);
         } else {
             nextFormButton.setEnabled(false);
         }
 
         //Previous btn hide/show
-        if (hasPrevForm) {
+        if (hasPrevForm && currentFormIndex!=0) {
             prevFormButton.setEnabled(true);
         } else {
             prevFormButton.setEnabled(false);
@@ -735,29 +755,46 @@ public class FormDataActivity extends AppCompatActivity {
 
         if (!awesomeValidation.validate()) return;
 
+        if(  imageFields.size() > 0) {//check if all image fields have been satifiesd
+            Toast.makeText(this, "Provide all images", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         preparePostData();
         uiHelper.showLoader("Submitting data...");
-        submissionViewModel.postData(postDataObject).observe(this, submissionResponse -> {
-            try {
-                uiHelper.hideLoader();
 
-                Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_LONG).show();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            } finally {
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                finish();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                goHome();
             }
+        }, 5000);
 
+        submissionViewModel.postData(postDataObject).observe(this, submissionResponse -> {
+            goHome();
         });
+    }
+
+    private void goHome(){
+
+        try {
+            uiHelper.hideLoader();
+
+            Toast.makeText(this, "Data submitted successfully", Toast.LENGTH_LONG).show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     public void onNextClick(View view) {
 
       if (!awesomeValidation.validate()) return;
 
-        cacheData();
+         cacheData();
 
         List<FormEntity> forms = AppData.allForms;
         int currentFormIndex = forms.indexOf(selectedForm);
@@ -778,7 +815,7 @@ public class FormDataActivity extends AppCompatActivity {
 
         if (!awesomeValidation.validate()) return;
 
-        cacheData();
+         cacheData();
 
         List<FormEntity> forms = AppData.allForms;
         int currentFormIndex   = forms.indexOf(selectedForm);
@@ -812,7 +849,7 @@ public class FormDataActivity extends AppCompatActivity {
             }, 5000);
 
         } else {
-            Intent intent = new Intent(this,FormsActivity.class);
+            Intent intent = new Intent(this,PersonSearchActivity.class);
             startActivity(intent);
             finish();
         }

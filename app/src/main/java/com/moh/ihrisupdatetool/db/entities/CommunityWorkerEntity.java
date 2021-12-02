@@ -27,6 +27,8 @@ public class CommunityWorkerEntity {
     private String facility;
     private String national_id;
     private String facility_id;
+    private String gender;
+    private String birth_date;
 
     @Ignore
     private String fullName;
@@ -146,6 +148,26 @@ public class CommunityWorkerEntity {
 
     public String getFullName() {
         return surname+" "+((othername!=null)?othername:"")+" "+firstname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getBirth_date() {
+        return birth_date;
+    }
+
+    public void setBirth_date(String birth_date) {
+        this.birth_date = birth_date;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     @Override

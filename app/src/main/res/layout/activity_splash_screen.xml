@@ -13,9 +13,9 @@
     <ImageView
         android:layout_centerInParent="true"
         android:layout_gravity="center"
-        android:layout_width="200dp"
+        android:layout_width="150dp"
         android:src="@drawable/uganda_svg"
-        android:layout_height="200dp">
+        android:layout_height="150dp">
     </ImageView>
 
   <LinearLayout
