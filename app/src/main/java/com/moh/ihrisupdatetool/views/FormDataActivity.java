@@ -51,9 +51,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -336,7 +338,8 @@ public class FormDataActivity extends AppCompatActivity {
         imageHolder.setId(Integer.parseInt(field.getId()));
         imageHolder.setText("Choose " + field.getLabel());
 
-        imageFields.add(Integer.parseInt(field.getId())); //track Image fields
+        if( !isTrackedImage(Integer.parseInt(field.getId())) && field.getIs_visible() );
+            imageFields.add(Integer.parseInt(field.getId())); //track Image fields
 
         imageHolder.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -351,12 +354,46 @@ public class FormDataActivity extends AppCompatActivity {
         imageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         imageView.setPadding(10, 30, 10, 10);
 
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dispatchTakePictureIntent(field);
+            }
+        });
+
+         JsonElement element = postDataObject.get(field.getForm_field());
+
+        if (element != null) {
+            Log.e(TAG,field.getForm_field() +" image set");
+            try {
+                String elemValue = element.getAsString();
+                Log.e(TAG,elemValue);
+                Bitmap bitmap = AppUtils.base64ToBitmap(elemValue);
+
+                imageView.setImageBitmap(AppUtils.resizeBitmap(bitmap));
+                imageView.setVisibility(View.VISIBLE);
+
+            } catch (Exception ex) {
+                // Log.e(TAG,field.getForm_field() +" value not set");
+                ex.printStackTrace();
+            }
+        }
+
         currentField.addView(imageHolder);
         currentField.addView(imageView);
 
         dynamicFieldsWrapper.addView(currentField);
     }
 
+    private Boolean isTrackedImage(int fieldId) {
+        Boolean isTracked = false;
+        for(int i=0; i<imageFields.size();i++){
+
+            if(imageFields.get(i) == fieldId)
+                isTracked= true;
+        }
+        return isTracked;
+    }
     private void dispatchTakePictureIntent(FormField field) {
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -429,10 +466,9 @@ public class FormDataActivity extends AppCompatActivity {
                 Log.e(TAG, field.getForm_field() + " value not set");
                 String elemValue = element.getAsString();
 
+                int selectedIndex = getAutoSelectValueIndex(spinner,elemValue);
                 Log.e(TAG, " value :: "+elemValue);
-
-                int selectedValue = adapter.getPosition(elemValue);
-                spinner.setSelection(selectedValue);
+                spinner.setSelection(selectedIndex);
             } catch (Exception ex) {
                 Log.e(TAG, field.getForm_field() + " value not set");
                 ex.printStackTrace();
@@ -617,7 +653,8 @@ public class FormDataActivity extends AppCompatActivity {
         if (element != null) {
             try {
                 String elemValue = element.getAsString();
-                autoCompleteField.setText(elemValue);
+                int selectedIndex = adapter.getPosition(elemValue);
+                autoCompleteField.setText(spinnerOptions.get(selectedIndex));
             }catch(Exception ex){
                 Log.e(TAG,field.getForm_field() +" value not set");
                 ex.printStackTrace();
@@ -649,6 +686,18 @@ public class FormDataActivity extends AppCompatActivity {
         dynamicFieldsWrapper.addView(currentField);
         awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
 
+    }
+
+    private int getAutoSelectValueIndex(Spinner spinner, String myString)
+    {
+        int index = 0;
+        for(int i = 0; i < spinner.getCount(); i++){
+            if(spinner.getItemAtPosition(i).toString().equals(myString)){
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 
     private void preparePostData() {
@@ -700,18 +749,16 @@ public class FormDataActivity extends AppCompatActivity {
 
                 String encodedImage = AppUtils.bitmapTobase64(photo);
                 postDataObject.addProperty(currentImageField.getForm_field(), encodedImage);
+
                 TextView imageLabel = findViewById(Integer.parseInt(currentImageField.getId()));
                 imageLabel.setText(currentImageField.getLabel() + ": Attached Successfully");
 
-               //int index = imageFields.indexOf(Integer.parseInt(currentImageField.getId()));
-                //imageFields.remove(index);
                 for(int i=0; i<imageFields.size(); i++){
+
                     if( imageFields.get(i) == Integer.parseInt(currentImageField.getId()) )
                      imageFields.remove(i);
                     Log.e(TAG, "Image Index "+i);
                 }
-
-
                Log.e(TAG, "Images  "+imageFields.size());
 
                currentImageField = null;
@@ -756,8 +803,8 @@ public class FormDataActivity extends AppCompatActivity {
         if (!awesomeValidation.validate()) return;
 
         if(  imageFields.size() > 0) {//check if all image fields have been satifiesd
-            Toast.makeText(this, "Provide all images", Toast.LENGTH_LONG).show();
-            return;
+            //Toast.makeText(this, "Provide all images", Toast.LENGTH_LONG).show();
+            //return;
         }
 
         preparePostData();

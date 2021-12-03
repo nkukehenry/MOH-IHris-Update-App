@@ -3,7 +3,7 @@ package com.moh.ihrisupdatetool.utils;
 public class AppConstants {
 
     public static  final  String SELECTED_FORM ="selectedForm";
-    public  static  final String BASE_URL  ="https://hris2.health.go.ug/who_tool/api/data/";
+    public  static  final String BASE_URL  ="https://mobileihris.health.go.ug/api/data/";
     public  static  final String BASE_URL2 ="https://hris2.health.go.ug/api_systems/index.php/api/";
     public  static  final String BASE_URL3 ="https://hris.health.go.ug/apiv1/index.php/api/";
 

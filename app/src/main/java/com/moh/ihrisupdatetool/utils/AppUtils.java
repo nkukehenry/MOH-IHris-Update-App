@@ -1,6 +1,7 @@
 package com.moh.ihrisupdatetool.utils;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.text.InputType;
 import android.util.Base64;
@@ -40,6 +41,12 @@ public class AppUtils {
         byte[] b = baos.toByteArray();
 
         return Base64.encodeToString(b, Base64.NO_WRAP);
+    }
+
+    public static Bitmap base64ToBitmap(String base64Image) {
+        byte[] decodedString = Base64.decode(base64Image, Base64.NO_WRAP);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        return decodedByte;
     }
 
     public static int getInputTypeClass(String remoteType){

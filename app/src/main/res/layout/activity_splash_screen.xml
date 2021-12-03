@@ -23,11 +23,23 @@
       android:layout_height="wrap_content"
       android:gravity="center"
       android:layout_alignParentBottom="true">
+
       <ImageView
-            android:layout_gravity="center"
-            android:layout_width="100dp"
-            android:src="@drawable/who"
-            android:layout_height="50dp"/>
+          android:layout_gravity="center"
+          android:layout_width="100dp"
+          android:src="@drawable/usaid"
+          android:layout_height="50dp"/>
+
+      <ImageView
+          android:layout_gravity="center"
+          android:layout_width="100dp"
+          android:src="@drawable/ihris_logo_300x200"
+          android:layout_height="50dp"/>
+      <ImageView
+          android:layout_gravity="center"
+          android:layout_width="100dp"
+          android:src="@drawable/who"
+          android:layout_height="50dp"/>
 
   </LinearLayout>
 
