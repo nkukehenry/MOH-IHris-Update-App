@@ -32,18 +32,20 @@ public class AppRemoteCallRepository implements IAppRemoteCallRepository {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
 
-//               System.out.println(response.body() );
-
                 if(!response.isSuccessful()){
-                    data.postValue(null);
+                    data.setValue(null);
                     return;
                 }
 
                 Type genType = new TypeToken<T>() {}.getType();
-                assert response.body() != null;
-
-                T results = AppUtils.objectToType(response.body(),genType);
-                data.postValue(results);
+                //assert response.body() != null;
+                try {
+                    T results = AppUtils.objectToType(response.body(), genType);
+                    data.setValue(results);
+                }catch(Exception exception){
+                    data.setValue(null);
+                    exception.printStackTrace();
+                }
 
             }
 
@@ -63,11 +65,8 @@ public class AppRemoteCallRepository implements IAppRemoteCallRepository {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
 
-                System.out.println("Response in repo");
-               System.out.println(response);
-
                 if(!response.isSuccessful()){
-                    data.postValue(null);
+                    data.setValue(null);
                     return;
                 }
 

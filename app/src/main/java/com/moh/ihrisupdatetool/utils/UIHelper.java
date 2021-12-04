@@ -22,7 +22,9 @@ public class UIHelper {
     private Dialog dialog;
 
     public UIHelper(Context context) {
-        progressDialog = new ProgressDialog(context);
+        progressDialog = new ProgressDialog(context ,R.style.loderderTheme);
+        progressDialog.setCancelable(false);
+        progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
         dialog = new Dialog(context);
         dialog.setCancelable(false);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);

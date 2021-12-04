@@ -37,8 +37,11 @@ public class MinistryWorkerRepository {
     }
 
     public LiveData<List<MinistryWorkerEntity>> fetchMinistryWorkers(Boolean deleteCache){
-
-        fetchFromApi();
+        try {
+            fetchFromApi();
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
         return ministryWorkerResponse;
     }
 
@@ -72,7 +75,6 @@ public class MinistryWorkerRepository {
 
     private void  fetchFromApi(){
         genericAppRepository.get(AppConstants.GET_MINISTRY_WORKER_DATA_URL()).observeForever(o -> {
-            System.out.println(o);
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<MinistryWorkerEntity>>() {}.getType();

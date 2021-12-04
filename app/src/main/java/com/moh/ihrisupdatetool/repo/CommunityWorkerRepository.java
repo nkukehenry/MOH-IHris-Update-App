@@ -74,7 +74,6 @@ public class CommunityWorkerRepository {
 
     private void  fetchFromApi(){
         genericAppRepository.get(AppConstants.GET_COMMUNITY_WORKER_DATA_URL()).observeForever(o -> {
-            System.out.println(o);
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<CommunityWorkerEntity>>() {}.getType();

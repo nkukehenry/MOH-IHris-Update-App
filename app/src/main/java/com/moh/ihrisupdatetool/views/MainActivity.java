@@ -3,7 +3,9 @@ package com.moh.ihrisupdatetool.views;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +14,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.moh.ihrisupdatetool.R;
+import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppData;
 import com.moh.ihrisupdatetool.utils.UIHelper;
 import com.moh.ihrisupdatetool.viewmodels.FormsViewModel;
@@ -91,29 +94,33 @@ public class MainActivity extends AppCompatActivity {
     private void syncResources(){
         uiHelper.showLoader("Synchronizing resources...");
 
-                //comm workers
-                workersViewModel.syncCommunityHealthWorkers().observe(MainActivity.this, resp -> {
+        try {
+            //comm workers
+            workersViewModel.syncCommunityHealthWorkers().observe(MainActivity.this, resp -> {
 
-                    //ministry workers
-                    workersViewModel.syncMinistryHealthWorkers().observe(MainActivity.this, submissionResponse -> {
+                //ministry workers
+                workersViewModel.syncMinistryHealthWorkers().observe(MainActivity.this, submissionResponse -> {
 
-                            //forms
-                        formsViewModel.syncForms().observe(MainActivity.this,rp->{
+                    //forms
+                    formsViewModel.syncForms().observe(MainActivity.this, rp -> {
 
-                            //fields
-                            formsViewModel.deleteFields();
+                        //fields
+                        formsViewModel.deleteFields();
 
-                            String msg = "Sync finished successfully, check your forms before exiting";
-                            uiHelper.hideLoader();
-                            Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        String msg = "Sync finished successfully, check your forms before exiting";
+                        uiHelper.hideLoader();
+                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
 
-                        } );
-
-                       });
-                    ;
+                    });
 
                 });
+                ;
 
+            });
+        }catch(Exception ex){
+            uiHelper.hideLoader();
+            ex.printStackTrace();
+        }
 
     }
 
@@ -143,9 +150,25 @@ public class MainActivity extends AppCompatActivity {
             case R.id.history:
                 goToHistory();
                 return true;
+            case R.id.logout:
+                 logOut();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void logOut(){
+
+        SharedPreferences sharedPreferences = getSharedPreferences(AppConstants.SHAREDPREF_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(AppConstants.LOGIN_CODE);
+        editor.commit();
+
+        Intent  loginIntent=new Intent(MainActivity.this, LoginActivity.class );
+        startActivity(loginIntent);
+        finishAffinity();
+
     }
 
     @Override

@@ -167,20 +167,38 @@ public class FormDataActivity extends AppCompatActivity {
 
         if (selectedCommWorker != null) {
 
-            postDataObject.addProperty("surname",   selectedCommWorker.getSurname());
-            postDataObject.addProperty("othername", selectedCommWorker.getOthername());
-            postDataObject.addProperty("firstname", selectedCommWorker.getFirstname());
-            postDataObject.addProperty("ihris_pid", selectedCommWorker.getPersonId());
-            postDataObject.addProperty("primary_mobile_number", selectedCommWorker.getMobile());
+            setPostDataField("birth_date",selectedCommWorker.getBirth_date());
+            setPostDataField("gender",    selectedCommWorker.getGender());
+            setPostDataField("job",       selectedCommWorker.getJob());
+            setPostDataField("facility",  selectedCommWorker.getFacility());
+            setPostDataField("surname",   selectedCommWorker.getSurname());
+            setPostDataField("othername", selectedCommWorker.getOthername());
+            setPostDataField("firstname", selectedCommWorker.getFirstname());
+            setPostDataField("ihris_pid", selectedCommWorker.getPersonId());
+            setPostDataField("primary_mobile_number", selectedCommWorker.getMobile());
+            setPostDataField("national_id", selectedCommWorker.getNational_id());
+
         }
         else if (selectedMinWorker != null) {
 
-            postDataObject.addProperty("surname", selectedMinWorker.getSurname());
-            postDataObject.addProperty("othername", selectedMinWorker.getOthername());
-            postDataObject.addProperty("firstname", selectedMinWorker.getFirstname());
-            postDataObject.addProperty("ihris_pid", selectedMinWorker.getPersonId());
-            postDataObject.addProperty("primary_mobile_number", selectedMinWorker.getPhone());
+            setPostDataField("birth_date",selectedMinWorker.getBirth_date());
+            setPostDataField("gender",    selectedMinWorker.getGender());
+            setPostDataField("job",       selectedMinWorker.getJob());
+            setPostDataField("facility",  selectedMinWorker.getFacility());
+            setPostDataField("surname",   selectedMinWorker.getSurname());
+            setPostDataField("othername", selectedMinWorker.getOthername());
+            setPostDataField("firstname", selectedMinWorker.getFirstname());
+            setPostDataField("ihris_pid", selectedMinWorker.getPersonId());
+            setPostDataField("primary_mobile_number", selectedMinWorker.getPhone());
+            setPostDataField("national_id", selectedCommWorker.getNational_id());
         }
+
+    }
+
+    private void setPostDataField(String dataKey,String dataValue){
+
+        if(dataValue!=null && !dataValue.isEmpty())
+         postDataObject.addProperty(dataKey,dataValue);
 
     }
 
@@ -195,13 +213,6 @@ public class FormDataActivity extends AppCompatActivity {
 
                     if(formsFieldsResponse!=null && !formsFieldsResponse.isEmpty()) {
 
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                uiHelper.hideLoader();
-                            }
-                        }, 1000);
-
                         prefillHealthWorkerValues();//attempt to populate worker's info
 
                         //instantiate awesome again
@@ -213,6 +224,8 @@ public class FormDataActivity extends AppCompatActivity {
 
                         try {
                             for (FormField field : formsFieldsResponse) {
+
+                                Log.e(TAG, String.valueOf(field));
 
                                 FormFieldType fieldType = AppUtils.InputType(field.getData_type());
 
@@ -246,7 +259,15 @@ public class FormDataActivity extends AppCompatActivity {
                         }
                     }
 
-                });
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            uiHelper.hideLoader();
+                        }
+                    }, 1000);
+
+
+        });
     }
 
     private void renderTextBasedField(FormField field) {
@@ -277,19 +298,6 @@ public class FormDataActivity extends AppCompatActivity {
         edtPass.setBackgroundColor(0x00000000);
         edtPass.setId(Integer.parseInt(field.getId()));
 
-        JsonElement element = postDataObject.get(field.getForm_field());
-
-        if (element != null) {
-            try {
-                String elemValue = element.getAsString();
-                edtPass.setText(elemValue);
-            }catch(Exception ex){
-               // Log.e(TAG,field.getForm_field() +" value not set");
-                //ex.printStackTrace();
-            }
-        }
-
-
         currentField.addView(edtPass);
 
         View view = new View(this);
@@ -311,6 +319,22 @@ public class FormDataActivity extends AppCompatActivity {
 
         if(lengthConstrait > 0)
         awesomeValidation.addValidation(this, Integer.parseInt(field.getId()),customValidators.maxLengthValidator(lengthConstrait),R.string.too_short);
+
+        JsonElement element = postDataObject.get(field.getForm_field());
+
+        if (element != null) {
+            try {
+                String elemValue = element.getAsString();
+                EditText currentPass = findViewById(Integer.parseInt(field.getId()));
+
+                if(!elemValue.isEmpty())
+                  currentPass.setText(elemValue);
+
+            }catch(Exception ex){
+               // Log.e(TAG,field.getForm_field() +" value not set");
+                //ex.printStackTrace();
+            }
+        }
 
     }
 
@@ -458,17 +482,30 @@ public class FormDataActivity extends AppCompatActivity {
         spinner.setAdapter(adapter);
         spinner.setLayoutParams(params);
 
+
+        currentField.addView(spinnerLabel);
+        currentField.addView(spinner);
+
+        View view = new View(this);
+        view.setBackgroundColor(getResources().getColor(R.color.grey));
+        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+        currentField.addView(view);
+
+        dynamicFieldsWrapper.addView(currentField);
+
         //Attempt to set default item
         JsonElement element = postDataObject.get(field.getForm_field());
 
         if (element != null) {
             try {
-                Log.e(TAG, field.getForm_field() + " value not set");
+                Log.e(TAG, field.getForm_field() + "Spinner Value");
                 String elemValue = element.getAsString();
 
                 int selectedIndex = getAutoSelectValueIndex(spinner,elemValue);
                 Log.e(TAG, " value :: "+elemValue);
-                spinner.setSelection(selectedIndex);
+
+                adapter.notifyDataSetChanged();
+
             } catch (Exception ex) {
                 Log.e(TAG, field.getForm_field() + " value not set");
                 ex.printStackTrace();
@@ -496,16 +533,7 @@ public class FormDataActivity extends AppCompatActivity {
             }
         });
 
-        currentField.addView(spinnerLabel);
-        currentField.addView(spinner);
 
-        View view = new View(this);
-        view.setBackgroundColor(getResources().getColor(R.color.grey));
-        view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
-        currentField.addView(view);
-
-
-        dynamicFieldsWrapper.addView(currentField);
     }
 
     private void renderDateField(FormField field) {
@@ -518,7 +546,7 @@ public class FormDataActivity extends AppCompatActivity {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.topMargin = 8;
+        params.topMargin    = 8;
         params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
@@ -538,9 +566,6 @@ public class FormDataActivity extends AppCompatActivity {
         //Attach adapter to spinner
         dateField.setLayoutParams(params);
         dateField.setEnabled(false);
-
-        //Attempt to set default item
-        JsonElement element = postDataObject.get(field.getForm_field());
 
         currentField.addView(fieldLabel);
         currentField.addView(dateField);
@@ -589,6 +614,24 @@ public class FormDataActivity extends AppCompatActivity {
 
         if(field.getIs_required())
         awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
+
+
+
+        JsonElement element = postDataObject.get(field.getForm_field());
+
+        if (element != null) {
+            try {
+                String elemValue = element.getAsString();
+
+                if(!elemValue.isEmpty())
+                    dateField.setText(elemValue);
+
+            }catch(Exception ex){
+                // Log.e(TAG,field.getForm_field() +" value not set");
+                //ex.printStackTrace();
+            }
+        }
+
 
     }
 
@@ -647,6 +690,12 @@ public class FormDataActivity extends AppCompatActivity {
         autoCompleteField.setAdapter(adapter);
         autoCompleteField.setLayoutParams(params);
 
+        currentField.addView(spinnerLabel);
+        currentField.addView(autoCompleteField);
+        dynamicFieldsWrapper.addView(currentField);
+        awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
+
+
         //Attempt to set default item
         JsonElement element = postDataObject.get(field.getForm_field());
 
@@ -654,7 +703,16 @@ public class FormDataActivity extends AppCompatActivity {
             try {
                 String elemValue = element.getAsString();
                 int selectedIndex = adapter.getPosition(elemValue);
+
+                Log.e(TAG,"Selected Field");
+                Log.e(TAG, String.valueOf(field));
+
+                Log.e(TAG,"Selected Value");
+                Log.e(TAG,spinnerOptions.get(selectedIndex));
                 autoCompleteField.setText(spinnerOptions.get(selectedIndex));
+               AutoCompleteTextView thisTextView = findViewById(Integer.parseInt(field.getId()));
+               thisTextView.setText( spinnerOptions.get(selectedIndex) );
+
             }catch(Exception ex){
                 Log.e(TAG,field.getForm_field() +" value not set");
                 ex.printStackTrace();
@@ -681,10 +739,6 @@ public class FormDataActivity extends AppCompatActivity {
             }
         });
 
-        currentField.addView(spinnerLabel);
-        currentField.addView(autoCompleteField);
-        dynamicFieldsWrapper.addView(currentField);
-        awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
 
     }
 
@@ -860,7 +914,7 @@ public class FormDataActivity extends AppCompatActivity {
 
     public void onPrevClick(View view) {
 
-        if (!awesomeValidation.validate()) return;
+       // if (!awesomeValidation.validate()) return;
 
          cacheData();
 

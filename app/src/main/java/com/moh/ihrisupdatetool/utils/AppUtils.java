@@ -17,10 +17,15 @@ import java.util.Random;
 public class AppUtils {
 
     public static   <T> T objectToType(Object response, Type genType){
-        Gson gson = new Gson();
-        String json = gson.toJson(response);
-        T data = gson.fromJson(json, genType);
-        return  data;
+        try{
+            Gson gson = new Gson();
+            String json = gson.toJson(response);
+            T data = gson.fromJson(json, genType);
+            return  data;
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return null;
+        }
     }
 
     public static   <T> T stringToType(String response, Type genType){
@@ -119,5 +124,7 @@ public class AppUtils {
         Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, false);
         return newBitmap;
     }
+
+
 
 }
