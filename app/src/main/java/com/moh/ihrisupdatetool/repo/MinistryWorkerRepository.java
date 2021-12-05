@@ -27,6 +27,7 @@ public class MinistryWorkerRepository {
     private IAppRemoteCallRepository genericAppRepository;
     private MutableLiveData<List<MinistryWorkerEntity>> ministryWorkerResponse;
     private MinistryWorkerDao ministryWorkerDao;
+    private MutableLiveData<List<MinistryWorkerEntity>> cachedWorkers;
 
     @Inject
     public MinistryWorkerRepository(IAppRemoteCallRepository genericAppRepository, MinistryWorkerDao ministryWorkerDao) {
@@ -34,22 +35,24 @@ public class MinistryWorkerRepository {
         this.genericAppRepository = genericAppRepository;
         this.ministryWorkerResponse = new MutableLiveData<>();
         this.ministryWorkerDao = ministryWorkerDao;
+        cachedWorkers  = new MutableLiveData<>();
     }
 
-    public LiveData<List<MinistryWorkerEntity>> fetchMinistryWorkers(Boolean deleteCache){
+    public LiveData<List<MinistryWorkerEntity>> fetchMinistryWorkers(String districtName,Boolean deleteCache){
+        cachedWorkers  = new MutableLiveData<>();
         try {
-            fetchFromApi();
+            fetchFromApi(districtName,deleteCache);
         }catch(Exception ex){
             ex.printStackTrace();
         }
-        return ministryWorkerResponse;
+        return cachedWorkers;
     }
 
-    public LiveData<List<MinistryWorkerEntity>> fetchMinistryWorkers(){
+    public LiveData<List<MinistryWorkerEntity>> fetchMinistryWorkers(String districtName){
 
         ministryWorkerDao.getMinistryWorkers().observeForever(o->{
 
-            if(o.isEmpty()){ fetchFromApi(); } else {
+            if(o.isEmpty()){ fetchFromApi(districtName,false); } else {
                 this.ministryWorkerResponse.setValue(o);
             }
         });
@@ -73,21 +76,28 @@ public class MinistryWorkerRepository {
     }
 
 
-    private void  fetchFromApi(){
-        genericAppRepository.get(AppConstants.GET_MINISTRY_WORKER_DATA_URL()).observeForever(o -> {
+    private void  fetchFromApi(String districtName,Boolean deleteCache){
+        genericAppRepository.get(AppConstants.GET_MINISTRY_WORKER_DATA_URL(districtName)).observeForever(o -> {
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<MinistryWorkerEntity>>() {}.getType();
                 List<MinistryWorkerEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheWorkers(response);
-                this.ministryWorkerResponse.setValue(response);
+                if(deleteCache)
+                    cachedWorkers.setValue(response);
+                else
+                    ministryWorkerResponse.setValue(response);
             }
         });
     }
 
     private void  cacheWorkers(List<MinistryWorkerEntity> workers){
         new MinistryWorkerRepository.InsetAsyncTask(ministryWorkerDao).execute(workers);
+    }
+
+    public void  deleteData(){
+        new MinistryWorkerRepository.DeleteAsyncTask(ministryWorkerDao).execute();
     }
 
     static class InsetAsyncTask extends AsyncTask<List<MinistryWorkerEntity>, Void, Void> {

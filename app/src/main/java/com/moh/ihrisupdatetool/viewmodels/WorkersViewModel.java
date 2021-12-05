@@ -36,20 +36,25 @@ public class WorkersViewModel extends AndroidViewModel {
     }
 
 
-    public LiveData<List<CommunityWorkerEntity>> syncCommunityHealthWorkers(){
-        return communityWorkerRepository.fetchCommunityWorkers(true);
+    public LiveData<List<CommunityWorkerEntity>> syncCommunityHealthWorkers(String districtName){
+        return communityWorkerRepository.fetchCommunityWorkers(districtName,true);
     }
 
-    public LiveData<List<MinistryWorkerEntity>> syncMinistryHealthWorkers(){
-        return ministryWorkerRepository.fetchMinistryWorkers(true);
+    public LiveData<List<MinistryWorkerEntity>> syncMinistryHealthWorkers(String districtName){
+        return ministryWorkerRepository.fetchMinistryWorkers(districtName,true);
     }
 
-    public LiveData<List<CommunityWorkerEntity>> getCommunityHealthWorkers(){
-       return communityWorkerRepository.fetchCommunityWorkers();
+    public LiveData<List<CommunityWorkerEntity>> getCommunityHealthWorkers(String districtName){
+       return communityWorkerRepository.fetchCommunityWorkers(districtName);
     }
 
-    public LiveData<List<MinistryWorkerEntity>> getMinistryHealthWorkers(){
-        return ministryWorkerRepository.fetchMinistryWorkers();
+    public LiveData<List<MinistryWorkerEntity>> getMinistryHealthWorkers(String districtName){
+        return ministryWorkerRepository.fetchMinistryWorkers(districtName);
+    }
+
+    public void deleteData(){
+        ministryWorkerRepository.deleteData();
+        communityWorkerRepository.deleteData();
     }
 
     public LiveData<List<MinistryWorkerEntity>> searchMinistryWorker(String term,String districtName) {

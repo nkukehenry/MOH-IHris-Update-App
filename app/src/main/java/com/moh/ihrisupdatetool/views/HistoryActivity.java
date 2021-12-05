@@ -33,6 +33,8 @@ public class HistoryActivity extends AppCompatActivity {
 
         uiHelper = new UIHelper(this);
 
+        setTitle("History");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
         LinearLayoutManager linearLayout = new LinearLayoutManager(this);

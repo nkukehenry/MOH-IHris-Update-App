@@ -45,6 +45,7 @@ public class DataSubmissionRepository {
     public LiveData<JsonObject> syncData(){
 
         MutableLiveData<JsonObject> syncResponse = new MutableLiveData<>();
+
         dataEntryDao.getLocalRecords().observeForever(records -> {
 
                JsonObject resp = new JsonObject();
@@ -63,7 +64,6 @@ public class DataSubmissionRepository {
                 }else{
                     resp.addProperty("state",false);
                 }
-            dataEntryDao.getLocalRecords().removeObserver( dataEntryTemplates -> {});
             syncResponse.setValue(resp);
         });
 

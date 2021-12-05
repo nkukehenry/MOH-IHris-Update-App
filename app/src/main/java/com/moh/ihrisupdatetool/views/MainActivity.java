@@ -42,9 +42,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        workersViewModel    = new ViewModelProvider(this).get(WorkersViewModel.class);
         submissionViewModel = new ViewModelProvider(this).get(SubmissionViewModel.class);
         formsViewModel      = new ViewModelProvider(this).get(FormsViewModel.class);
+        workersViewModel = new ViewModelProvider(this).get(WorkersViewModel.class);
 
     }
 
@@ -81,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     private void syncCollectedLocalData(){
         uiHelper.showLoader("Synchronizing data...");
                 try {
@@ -95,26 +94,19 @@ public class MainActivity extends AppCompatActivity {
         uiHelper.showLoader("Synchronizing resources...");
 
         try {
-            //comm workers
-            workersViewModel.syncCommunityHealthWorkers().observe(MainActivity.this, resp -> {
+                //forms
+           formsViewModel.syncForms().observe(MainActivity.this, rp -> {
 
-                //ministry workers
-                workersViewModel.syncMinistryHealthWorkers().observe(MainActivity.this, submissionResponse -> {
+                //fields
+                formsViewModel.deleteFields();
+                workersViewModel.deleteData();
 
-                    //forms
-                    formsViewModel.syncForms().observe(MainActivity.this, rp -> {
+                String msg = "Proceed to sync districts data";
+                uiHelper.hideLoader();
+                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
 
-                        //fields
-                        formsViewModel.deleteFields();
-
-                        String msg = "Sync finished successfully, check your forms before exiting";
-                        uiHelper.hideLoader();
-                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-
-                    });
-
-                });
-                ;
+               Intent intent = new Intent(this, SynchronizationActivity.class);
+               startActivity(intent);
 
             });
         }catch(Exception ex){

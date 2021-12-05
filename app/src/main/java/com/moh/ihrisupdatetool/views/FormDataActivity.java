@@ -90,8 +90,6 @@ public class FormDataActivity extends AppCompatActivity {
     private List<Integer> imageFields = new ArrayList<>();
     private List<Integer> formsTracker = new ArrayList<>();
 
-    //@Inject
-
     private AwesomeValidation awesomeValidation;
 
     @Inject
@@ -190,7 +188,7 @@ public class FormDataActivity extends AppCompatActivity {
             setPostDataField("firstname", selectedMinWorker.getFirstname());
             setPostDataField("ihris_pid", selectedMinWorker.getPersonId());
             setPostDataField("primary_mobile_number", selectedMinWorker.getPhone());
-            setPostDataField("national_id", selectedCommWorker.getNational_id());
+            setPostDataField("national_id", selectedMinWorker.getNational_id());
         }
 
     }
@@ -340,8 +338,6 @@ public class FormDataActivity extends AppCompatActivity {
 
     private void renderImageField(FormField field) {
 
-
-
         // Create EditText
         TextInputLayout currentField = new TextInputLayout(this);
 
@@ -418,6 +414,7 @@ public class FormDataActivity extends AppCompatActivity {
         }
         return isTracked;
     }
+
     private void dispatchTakePictureIntent(FormField field) {
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -742,8 +739,7 @@ public class FormDataActivity extends AppCompatActivity {
 
     }
 
-    private int getAutoSelectValueIndex(Spinner spinner, String myString)
-    {
+    private int getAutoSelectValueIndex(Spinner spinner, String myString) {
         int index = 0;
         for(int i = 0; i < spinner.getCount(); i++){
             if(spinner.getItemAtPosition(i).toString().equals(myString)){

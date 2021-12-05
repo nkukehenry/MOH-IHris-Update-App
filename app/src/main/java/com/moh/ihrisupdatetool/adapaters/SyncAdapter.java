@@ -1,35 +1,32 @@
 package com.moh.ihrisupdatetool.adapaters;
 
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.moh.ihrisupdatetool.databinding.DistrictListBinding;
 import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
-import com.moh.ihrisupdatetool.db.entities.FacilityEntity;
 import com.moh.ihrisupdatetool.utils.AppData;
 import com.moh.ihrisupdatetool.views.DistrictsActivity;
-import com.moh.ihrisupdatetool.views.FormsActivity;
-import com.moh.ihrisupdatetool.views.PersonSearchActivity;
+import com.moh.ihrisupdatetool.views.SynchronizationActivity;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DistrictsAdapter extends RecyclerView.Adapter<DistrictsAdapter.DistrictViewHolder> {
+public class SyncAdapter extends RecyclerView.Adapter<SyncAdapter.DistrictViewHolder> {
 
     List<DistrictEntity> data;
     List<DistrictEntity> unFilteredData;
     private static Context context;
     private LayoutInflater inflater;
 
-    public DistrictsAdapter(List<DistrictEntity> data, Context context){
+    public SyncAdapter(List<DistrictEntity> data, Context context){
         this.data = data;
         this.unFilteredData = new ArrayList<>(data);
         this.context = context;
@@ -38,7 +35,7 @@ public class DistrictsAdapter extends RecyclerView.Adapter<DistrictsAdapter.Dist
     @NonNull
     @NotNull
     @Override
-    public DistrictsAdapter.DistrictViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
+    public SyncAdapter.DistrictViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
         if(inflater == null){
             inflater = LayoutInflater.from(parent.getContext());
         }
@@ -48,7 +45,7 @@ public class DistrictsAdapter extends RecyclerView.Adapter<DistrictsAdapter.Dist
     }
 
     @Override
-    public void onBindViewHolder(@NonNull @NotNull DistrictsAdapter.DistrictViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull @NotNull SyncAdapter.DistrictViewHolder holder, int position) {
         holder.bind(data.get(position));
     }
 
@@ -58,7 +55,6 @@ public class DistrictsAdapter extends RecyclerView.Adapter<DistrictsAdapter.Dist
     }
 
     public void filterDistricts(List<DistrictEntity> filteredList) {
-
         data = filteredList;
         notifyDataSetChanged();
     }
@@ -82,9 +78,8 @@ public class DistrictsAdapter extends RecyclerView.Adapter<DistrictsAdapter.Dist
         @Override
         public void onClick(View v) {
 
-            Intent intent = new Intent(v.getContext(), PersonSearchActivity.class);
-            AppData.selectedDistrict = districtListBinding.getDistrict();
-            v.getContext().startActivity(intent);
+            ((SynchronizationActivity) context ).selectDistrict(districtListBinding.getDistrict().getDistrictName());
+
         }
     }
 

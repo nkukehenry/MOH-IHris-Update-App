@@ -25,7 +25,7 @@ public class CommunityWorkerRepository {
     private IAppRemoteCallRepository genericAppRepository;
     private CommunityWorkerDao communitWorkerDao;
     private MutableLiveData<List<CommunityWorkerEntity>> communityWorkers;
-
+    private MutableLiveData<List<CommunityWorkerEntity>> cachedWorkers;
 
     @Inject
     public CommunityWorkerRepository(IAppRemoteCallRepository genericAppRepository, CommunityWorkerDao commuityWorkerDao) {
@@ -33,24 +33,23 @@ public class CommunityWorkerRepository {
         this.genericAppRepository = genericAppRepository;
         this.communitWorkerDao = commuityWorkerDao;
         communityWorkers = new MutableLiveData<>();
+        cachedWorkers = new MutableLiveData<>();
     }
-    public LiveData<List<CommunityWorkerEntity>> fetchCommunityWorkers(Boolean deleteCache){
-        fetchFromApi();
-       return communityWorkers;
+    public LiveData<List<CommunityWorkerEntity>> fetchCommunityWorkers(String district, Boolean deleteCache){
+        cachedWorkers = new MutableLiveData<>();
+        fetchFromApi(district,deleteCache);
+       return cachedWorkers;
     }
 
-    public LiveData<List<CommunityWorkerEntity>> fetchCommunityWorkers(){
+    public LiveData<List<CommunityWorkerEntity>> fetchCommunityWorkers(String district){
 
         communitWorkerDao.getCommunityWorkers().observeForever(workers -> {
 
-            if(workers.isEmpty()){
-                fetchFromApi();
+            if( workers.isEmpty() ){
+                fetchFromApi(district,false);
             }else{
                 communityWorkers.setValue(workers);
             }
-            communitWorkerDao.getCommunityWorkers().removeObserver(communityWorkerEntities -> {
-                //removed
-            });
         });
 
         return communityWorkers;
@@ -72,22 +71,28 @@ public class CommunityWorkerRepository {
     }
 
 
-    private void  fetchFromApi(){
-        genericAppRepository.get(AppConstants.GET_COMMUNITY_WORKER_DATA_URL()).observeForever(o -> {
+    private void  fetchFromApi(String district,Boolean deleteCache){
+        genericAppRepository.get(AppConstants.GET_COMMUNITY_WORKER_DATA_URL(district)).observeForever(o -> {
             if(o != null){
                 //convert response to required type
                 Type genType = new TypeToken<List<CommunityWorkerEntity>>() {}.getType();
                 List<CommunityWorkerEntity> response = AppUtils.objectToType(o,genType);
                 //add values to the observable
                 cacheWorkers(response);
-                communityWorkers.setValue(response);;
+                if(deleteCache)
+                    cachedWorkers.setValue(response);
+                else
+                communityWorkers.setValue(response);
             }
         });
     }
 
     private void  cacheWorkers(List<CommunityWorkerEntity> workers){
-        System.out.println(workers);
         new CommunityWorkerRepository.InsetAsyncTask(communitWorkerDao).execute(workers);
+    }
+
+    public void  deleteData(){
+        new CommunityWorkerRepository.DeleteAsyncTask(communitWorkerDao).execute();
     }
 
     static class InsetAsyncTask extends AsyncTask<List<CommunityWorkerEntity>, Void, Void> {

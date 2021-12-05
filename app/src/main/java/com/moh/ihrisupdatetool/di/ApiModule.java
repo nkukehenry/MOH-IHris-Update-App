@@ -82,7 +82,7 @@ public class ApiModule {
                 .addInterceptor(apiInterceptor)
                 .addInterceptor(loggingInterceptor)
                 .hostnameVerifier(hostnameVerifier)
-                .retryOnConnectionFailure(false)
+                .retryOnConnectionFailure(true)
                 .build();
     }
 
@@ -99,7 +99,7 @@ public class ApiModule {
     @Singleton
     @Provides
     public static HttpLoggingInterceptor provideLoggingInterceptor() {
-        return new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS);
+        return new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
     }
 
     @Singleton

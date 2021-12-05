@@ -12,15 +12,17 @@
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:hardwareAccelerated="true"
         android:theme="@style/Theme.IHRisUpdateTool">
-        <activity android:name=".views.LoginActivity"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"></activity>
+        <activity android:name=".views.SynchronizationActivity"></activity>
+        <activity
+            android:name=".views.LoginActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity android:name=".views.HistoryActivity" />
         <activity android:name=".views.PersonSearchActivity" />
         <activity android:name=".views.MainActivity" />

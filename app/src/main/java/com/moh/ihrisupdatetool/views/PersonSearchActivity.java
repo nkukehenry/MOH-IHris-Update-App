@@ -46,6 +46,8 @@ public class PersonSearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person_search);
 
+        setTitle("Person Search");
+
         //Reset workers
         AppData.selectedMinistryWorker  = null;
         AppData.selectedCommunityWorker = null;

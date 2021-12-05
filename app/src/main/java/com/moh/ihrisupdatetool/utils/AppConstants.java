@@ -17,8 +17,8 @@ public class AppConstants {
 
     public static String POST_FORM_DATA_URL() { return String.format("%s%s",BASE_URL,"create"); }
 
-    public static String GET_MINISTRY_WORKER_DATA_URL() { return  String.format("%s%s",BASE_URL3,"hwdata");}
-    public static String GET_COMMUNITY_WORKER_DATA_URL() { return String.format("%s%s",BASE_URL2,"chwdata");}
+    public static String GET_MINISTRY_WORKER_DATA_URL(String districtName) { return  String.format("%s%s%s",BASE_URL3,"hwdata/",districtName);}
+    public static String GET_COMMUNITY_WORKER_DATA_URL(String districtName) { return String.format("%s%s%s",BASE_URL2,"chwdata/",districtName);}
 
     public static String GET_LOGIN_BYCODE(String userCode) { return String.format("%s%s%s",BASE_URL,"auth/",userCode); }
 }
