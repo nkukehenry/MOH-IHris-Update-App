@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         submissionViewModel = new ViewModelProvider(this).get(SubmissionViewModel.class);
         formsViewModel      = new ViewModelProvider(this).get(FormsViewModel.class);
-        workersViewModel = new ViewModelProvider(this).get(WorkersViewModel.class);
+        workersViewModel    = new ViewModelProvider(this).get(WorkersViewModel.class);
 
     }
 
