@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -87,8 +88,7 @@ public class FormDataActivity extends AppCompatActivity {
     private MinistryWorkerEntity selectedMinWorker;
     private int exitCounter=0;
     private SimpleDateFormat simpleDateFormat;
-    private List<Integer> imageFields = new ArrayList<>();
-    private List<Integer> formsTracker = new ArrayList<>();
+    private Set<Integer> imageFields = new HashSet<>();
 
     private AwesomeValidation awesomeValidation;
 
@@ -407,10 +407,11 @@ public class FormDataActivity extends AppCompatActivity {
 
     private Boolean isTrackedImage(int fieldId) {
         Boolean isTracked = false;
-        for(int i=0; i<imageFields.size();i++){
 
-            if(imageFields.get(i) == fieldId)
-                isTracked= true;
+        for (Iterator<Integer> it = imageFields.iterator(); it.hasNext(); ) {
+            int current= it.next();
+            if (current == fieldId)
+                isTracked = true;
         }
         return isTracked;
     }
@@ -804,11 +805,9 @@ public class FormDataActivity extends AppCompatActivity {
                 imageLabel.setText(currentImageField.getLabel() + ": Attached Successfully");
 
                 for(int i=0; i<imageFields.size(); i++){
-
-                    if( imageFields.get(i) == Integer.parseInt(currentImageField.getId()) )
-                     imageFields.remove(i);
-                    Log.e(TAG, "Image Index "+i);
+                     imageFields.remove(currentImageField.getId());
                 }
+
                Log.e(TAG, "Images  "+imageFields.size());
 
                currentImageField = null;
@@ -853,8 +852,8 @@ public class FormDataActivity extends AppCompatActivity {
         if (!awesomeValidation.validate()) return;
 
         if(  imageFields.size() > 0) {//check if all image fields have been satifiesd
-            //Toast.makeText(this, "Provide all images", Toast.LENGTH_LONG).show();
-            //return;
+            Toast.makeText(this, "Provide all images", Toast.LENGTH_LONG).show();
+            return;
         }
 
         preparePostData();
