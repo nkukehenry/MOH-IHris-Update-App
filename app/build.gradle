@@ -42,6 +42,7 @@ dependencies {
     implementation 'com.google.dagger:hilt-android:2.39.1'
     annotationProcessor 'com.google.dagger:hilt-compiler:2.39.1'
 
+
     //MVVM
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'org.jetbrains:annotations:15.0'
@@ -81,5 +82,8 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
 
     //datepicker
-    compile 'com.github.drawers:SpinnerDatePicker:2.0.1'
+    implementation 'com.github.drawers:SpinnerDatePicker:2.0.1'
+
+    //signature pad
+    implementation 'com.github.gcacace:signature-pad:1.3.1'
 }

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.utility.RegexTemplate;
+import com.github.gcacace.signaturepad.views.SignaturePad;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.common.collect.Range;
 import com.google.gson.Gson;
@@ -88,7 +90,7 @@ public class FormDataActivity extends AppCompatActivity {
     private MinistryWorkerEntity selectedMinWorker;
     private int exitCounter=0;
     private SimpleDateFormat simpleDateFormat;
-    private Set<Integer> imageFields = new HashSet<>();
+    private Set<String> imageFields = new HashSet<>();
 
     private AwesomeValidation awesomeValidation;
 
@@ -103,6 +105,7 @@ public class FormDataActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_fields);
+
         try{
             initAcitvity();
         }catch(Exception ex){
@@ -144,6 +147,7 @@ public class FormDataActivity extends AppCompatActivity {
 
     private void prefillHealthWorkerValues() {
 
+
         //worker Type is as per selection on mainactivity
         String workerType = (AppData.isCommunityWorker)?"chw":"mhw";
         postDataObject.addProperty("hw_type",workerType);
@@ -163,7 +167,11 @@ public class FormDataActivity extends AppCompatActivity {
             prevFormButton.setEnabled(true);
         }
 
+        Log.e(TAG,"Worker Here");
+
         if (selectedCommWorker != null) {
+
+            Log.e(TAG,selectedCommWorker.toString());
 
             setPostDataField("birth_date",selectedCommWorker.getBirth_date());
             setPostDataField("gender",    selectedCommWorker.getGender());
@@ -175,9 +183,11 @@ public class FormDataActivity extends AppCompatActivity {
             setPostDataField("ihris_pid", selectedCommWorker.getPersonId());
             setPostDataField("primary_mobile_number", selectedCommWorker.getMobile());
             setPostDataField("national_id", selectedCommWorker.getNational_id());
+            setPostDataField("district_id", selectedCommWorker.getDistrict_id());
 
-        }
-        else if (selectedMinWorker != null) {
+        }else if (selectedMinWorker != null) {
+
+            Log.e(TAG,selectedMinWorker.toString());
 
             setPostDataField("birth_date",selectedMinWorker.getBirth_date());
             setPostDataField("gender",    selectedMinWorker.getGender());
@@ -189,7 +199,9 @@ public class FormDataActivity extends AppCompatActivity {
             setPostDataField("ihris_pid", selectedMinWorker.getPersonId());
             setPostDataField("primary_mobile_number", selectedMinWorker.getPhone());
             setPostDataField("national_id", selectedMinWorker.getNational_id());
+            setPostDataField("district_id", selectedMinWorker.getDistrict_id());
         }
+
 
     }
 
@@ -241,6 +253,9 @@ public class FormDataActivity extends AppCompatActivity {
                                         break;
                                     case TEXT_AUTOCOMPLETE_FIELD:
                                         renderTextAutoCompleteField(field);
+                                        break;
+                                    case SIGNATURE_FIELD:
+                                        renderSignatureField(field);
                                         break;
                                     default:
                                         renderTextBasedField(field);
@@ -307,6 +322,22 @@ public class FormDataActivity extends AppCompatActivity {
 
         Integer  lengthConstrait  = field.getDb_constraint();
 
+        JsonElement element = postDataObject.get(field.getForm_field());
+
+        if (element != null) {
+            try {
+                String elemValue = element.getAsString();
+                EditText thisField = findViewById(Integer.parseInt(field.getId()));
+
+                if(!elemValue.isEmpty())
+                    thisField.setText(elemValue);
+
+            }catch(Exception ex){
+                // Log.e(TAG,field.getForm_field() +" value not set");
+                //ex.printStackTrace();
+            }
+        }
+
         if(field.getIs_disabled()) return; // is disabled, don't valdiate anything on it
 
         if(field.getData_format().equals( InputType.TYPE_CLASS_TEXT ))
@@ -318,21 +349,7 @@ public class FormDataActivity extends AppCompatActivity {
         if(lengthConstrait > 0)
         awesomeValidation.addValidation(this, Integer.parseInt(field.getId()),customValidators.maxLengthValidator(lengthConstrait),R.string.too_short);
 
-        JsonElement element = postDataObject.get(field.getForm_field());
 
-        if (element != null) {
-            try {
-                String elemValue = element.getAsString();
-                EditText currentPass = findViewById(Integer.parseInt(field.getId()));
-
-                if(!elemValue.isEmpty())
-                  currentPass.setText(elemValue);
-
-            }catch(Exception ex){
-               // Log.e(TAG,field.getForm_field() +" value not set");
-                //ex.printStackTrace();
-            }
-        }
 
     }
 
@@ -358,15 +375,14 @@ public class FormDataActivity extends AppCompatActivity {
         imageHolder.setId(Integer.parseInt(field.getId()));
         imageHolder.setText("Choose " + field.getLabel());
 
-        if( !isTrackedImage(Integer.parseInt(field.getId())) && field.getIs_visible() );
-            imageFields.add(Integer.parseInt(field.getId())); //track Image fields
+        //data already captured
+        JsonElement capturedData = postDataObject.get(field.getForm_field());
 
-        imageHolder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dispatchTakePictureIntent(field);
-            }
-        });
+        if( field.getIs_visible() && capturedData == null) {
+            imageFields.add(field.getForm_field()); //track Image fields
+        }
+
+        imageHolder.setOnClickListener(v -> dispatchTakePictureIntent(field));
 
         ImageView imageView = new ImageView(currentField.getContext());
         imageView.setId(Integer.parseInt(field.getId()) * 300);
@@ -374,19 +390,16 @@ public class FormDataActivity extends AppCompatActivity {
         imageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         imageView.setPadding(10, 30, 10, 10);
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dispatchTakePictureIntent(field);
-            }
-        });
 
-         JsonElement element = postDataObject.get(field.getForm_field());
+        currentField.setBackgroundResource(R.drawable.placeholder);
 
-        if (element != null) {
+        currentField.setOnClickListener(v -> dispatchTakePictureIntent(field));
+
+
+        if (capturedData != null) {
             Log.e(TAG,field.getForm_field() +" image set");
             try {
-                String elemValue = element.getAsString();
+                String elemValue = capturedData.getAsString();
                 Log.e(TAG,elemValue);
                 Bitmap bitmap = AppUtils.base64ToBitmap(elemValue);
 
@@ -403,17 +416,6 @@ public class FormDataActivity extends AppCompatActivity {
         currentField.addView(imageView);
 
         dynamicFieldsWrapper.addView(currentField);
-    }
-
-    private Boolean isTrackedImage(int fieldId) {
-        Boolean isTracked = false;
-
-        for (Iterator<Integer> it = imageFields.iterator(); it.hasNext(); ) {
-            int current= it.next();
-            if (current == fieldId)
-                isTracked = true;
-        }
-        return isTracked;
     }
 
     private void dispatchTakePictureIntent(FormField field) {
@@ -751,6 +753,103 @@ public class FormDataActivity extends AppCompatActivity {
         return index;
     }
 
+    private void renderSignatureField(FormField field) {
+
+        // Create EditText
+        LinearLayout currentField = new LinearLayout(this);
+
+        //Params
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.topMargin    = 8;
+        params.bottomMargin = 8;
+
+        currentField.setLayoutParams(params);
+        currentField.setOrientation( LinearLayout.VERTICAL );
+       // currentField.setBackgroundColor(getResources().getColor(R.color.black));
+
+        //Input
+        final TextView signatureLabel = new TextView(currentField.getContext());
+
+        signatureLabel.setPadding(25, 10, 25, 10);
+        signatureLabel.setTextColor(getResources().getColor(R.color.grey));
+        signatureLabel.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        signatureLabel.setBackgroundColor(0x00000000);
+        signatureLabel.setText(field.getLabel());
+        signatureLabel.setId( Integer.parseInt(field.getId()) *300);
+
+        SignaturePad signaturePad = new SignaturePad(currentField.getContext(),null);
+        signaturePad.setId(Integer.parseInt(field.getId()));
+       // signaturePad.setVisibility(View.GONE);
+        signaturePad.setLayoutParams( new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 500));
+        signaturePad.setPadding(10, 30, 10, 10);
+        signaturePad.setPenColor( getResources().getColor(R.color.black) );
+        signaturePad.setBackgroundColor( getResources().getColor(R.color.signature_grey) );
+
+        JsonElement element = postDataObject.get(field.getForm_field());
+
+        if (element != null) {
+            Log.e(TAG,field.getForm_field() +" signature set");
+            try {
+                String elemValue = element.getAsString();
+                Log.e(TAG,elemValue);
+                Bitmap bitmap = AppUtils.base64ToBitmap(elemValue);
+
+                signaturePad.setSignatureBitmap(AppUtils.resizeBitmap(bitmap));
+                signaturePad.setVisibility(View.VISIBLE);
+
+            } catch (Exception ex) {
+                // Log.e(TAG,field.getForm_field() +" value not set");
+                ex.printStackTrace();
+            }
+        }
+
+
+        final TextView clearTrigger = new TextView(currentField.getContext());
+
+        clearTrigger.setPadding(25, 5, 5, 5);
+        clearTrigger.setTextColor(getResources().getColor(R.color.grey));
+        clearTrigger.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        clearTrigger.setBackgroundColor(0x00000000);
+        clearTrigger.setText("Clear Signature");
+        clearTrigger.setVisibility(View.GONE);
+        clearTrigger.setTextColor(getResources().getColor(R.color.design_default_color_error));
+
+        clearTrigger.setOnClickListener(v -> signaturePad.clear());
+
+        signaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
+
+            @Override
+            public void onStartSigning() {
+                //Event triggered when the pad is touched
+                clearTrigger.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onSigned() {
+                //Event triggered when the pad is signed
+                Bitmap signature =  signaturePad.getSignatureBitmap();
+                String encodedSignatureImage = AppUtils.bitmapTobase64(signature);
+                Log.e(TAG,"Signature:: "+encodedSignatureImage);
+                postDataObject.addProperty(field.getForm_field(), encodedSignatureImage);
+            }
+
+            @Override
+            public void onClear() {
+                //Event triggered when the pad is cleared
+                postDataObject.remove(field.getForm_field());
+                clearTrigger.setVisibility(View.GONE);
+                //signaturePad.setSignatureBitmap(null);
+            }
+        });
+
+
+        currentField.addView(signatureLabel);
+        currentField.addView(signaturePad);
+        currentField.addView(clearTrigger);
+
+        dynamicFieldsWrapper.addView(currentField);
+    }
+
     private void preparePostData() {
 
         try {
@@ -762,13 +861,13 @@ public class FormDataActivity extends AppCompatActivity {
 
                     EditText textInput = findViewById(Integer.parseInt(field.getId()));
                     if(textInput!=null)
-                    postDataObject.addProperty(field.getForm_field(), textInput.getText().toString());
+                        postDataObject.addProperty(field.getForm_field(), textInput.getText().toString());
 
                 }else if (fieldType.equals(FormFieldType.TEXT_AUTOCOMPLETE_FIELD)) {
 
                     AutoCompleteTextView autoCompleteTextView = findViewById(Integer.parseInt(field.getId()));
                     if(autoCompleteTextView!=null)
-                    postDataObject.addProperty(field.getForm_field(), autoCompleteTextView.getText().toString());
+                        postDataObject.addProperty(field.getForm_field(), autoCompleteTextView.getText().toString());
 
                 }
 
@@ -782,6 +881,7 @@ public class FormDataActivity extends AppCompatActivity {
         preparePostData();
         //submissionViewModel.cacheData(postDataObject);
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -804,13 +904,9 @@ public class FormDataActivity extends AppCompatActivity {
                 TextView imageLabel = findViewById(Integer.parseInt(currentImageField.getId()));
                 imageLabel.setText(currentImageField.getLabel() + ": Attached Successfully");
 
-                for(int i=0; i<imageFields.size(); i++){
-                     imageFields.remove(currentImageField.getId());
-                }
+                Log.e(TAG, "Images  "+imageFields.size());
 
-               Log.e(TAG, "Images  "+imageFields.size());
-
-               currentImageField = null;
+                currentImageField = null;
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -851,8 +947,9 @@ public class FormDataActivity extends AppCompatActivity {
 
         if (!awesomeValidation.validate()) return;
 
-        if(  imageFields.size() > 0) {//check if all image fields have been satifiesd
-            Toast.makeText(this, "Provide all images", Toast.LENGTH_LONG).show();
+        if(  !validateImagesRequired() ) {
+            //check if all image fields have been satifies
+            Toast.makeText(this, "Provide the required "+imageFields.size()+" images ", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -871,6 +968,7 @@ public class FormDataActivity extends AppCompatActivity {
         });
     }
 
+
     private void goHome(){
 
         try {
@@ -888,9 +986,9 @@ public class FormDataActivity extends AppCompatActivity {
 
     public void onNextClick(View view) {
 
-      if (!awesomeValidation.validate()) return;
+        if (!awesomeValidation.validate()) return;
 
-         cacheData();
+        cacheData();
 
         List<FormEntity> forms = AppData.allForms;
         int currentFormIndex = forms.indexOf(selectedForm);
@@ -909,9 +1007,9 @@ public class FormDataActivity extends AppCompatActivity {
 
     public void onPrevClick(View view) {
 
-       // if (!awesomeValidation.validate()) return;
+        // if (!awesomeValidation.validate()) return;
 
-         cacheData();
+        cacheData();
 
         List<FormEntity> forms = AppData.allForms;
         int currentFormIndex   = forms.indexOf(selectedForm);
@@ -929,6 +1027,19 @@ public class FormDataActivity extends AppCompatActivity {
             hasNextForm = true;
         }
     }
+
+    private Boolean validateImagesRequired() {
+        Boolean allimagesCaptured = true;
+
+        for (Iterator<String> it = imageFields.iterator(); it.hasNext(); ) {
+            String current= it.next();
+            if ( postDataObject.get(current) == null)
+                allimagesCaptured = false;
+            else continue;
+        }
+        return allimagesCaptured;
+    }
+
 
     @Override
     public void onBackPressed() {

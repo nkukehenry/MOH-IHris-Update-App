@@ -5,5 +5,6 @@ public enum FormFieldType {
     DATE_FIELD,
     SPINNER_BASED_FIELD,
     TEXT_AUTOCOMPLETE_FIELD,
-    IMAGE_FIELD
+    IMAGE_FIELD,
+    SIGNATURE_FIELD
 }

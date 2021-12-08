@@ -37,6 +37,7 @@ public class FormsActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forms);
+
         LinearLayoutManager linearLayout = new LinearLayoutManager(this);
 
         formsRecycler = findViewById(R.id.formsRecycler);
@@ -74,12 +75,13 @@ public class FormsActivity extends AppCompatActivity {
         for(FormEntity form : AppData.allForms){
             formsViewModel.getFormFields(form.getId());
         }
-        uiHelper.hideLoader();
+        //uiHelper.hideLoader();
 
         showFirstForm(AppData.allForms.get(0));
     }
 
     private void showFirstForm(FormEntity selectedForm) {
+        uiHelper.hideLoader();
         Intent intent = new Intent(this, FormDataActivity.class);
         intent.putExtra(SELECTED_FORM, selectedForm);
         AppData.selectedForm = selectedForm;

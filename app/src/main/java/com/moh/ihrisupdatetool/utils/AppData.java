@@ -15,6 +15,6 @@ public class AppData {
     public static DistrictEntity selectedDistrict;
     public static CommunityWorkerEntity selectedCommunityWorker;
     public static MinistryWorkerEntity selectedMinistryWorker;
-    public static Boolean isCommunityWorker;
+    public static Boolean isCommunityWorker = false;
     public static int userId;
 }

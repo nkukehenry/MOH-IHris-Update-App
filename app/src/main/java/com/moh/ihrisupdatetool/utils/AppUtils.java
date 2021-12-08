@@ -91,6 +91,8 @@ public class AppUtils {
                 return FormFieldType.IMAGE_FIELD;
             case "varcharmap":
                 return FormFieldType.SPINNER_BASED_FIELD;
+            case "signature":
+                return FormFieldType.SIGNATURE_FIELD;
         }
         return FormFieldType.TEXT_BASED_FIELD;
     }
@@ -113,8 +115,8 @@ public class AppUtils {
         int height = bitmap.getHeight();
         int width = bitmap.getWidth();
 
-        float scaleWidth = ((float) width*5) / width;
-        float scaleHeight = ((float) height*5) / height;
+        float scaleWidth = ((float) width*10) / width;
+        float scaleHeight = ((float) height*8) / height;
 
         Matrix matrix = new Matrix();
         // here we do resize the bitmap
