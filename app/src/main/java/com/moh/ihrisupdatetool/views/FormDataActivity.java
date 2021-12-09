@@ -413,6 +413,7 @@ public class FormDataActivity extends AppCompatActivity {
         imageView.setVisibility(View.GONE);
         imageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         imageView.setPadding(10, imagePadding, 10, 5);
+        imageView.setAdjustViewBounds(true);
 
         currentField.setBackground( getResources().getDrawable(R.drawable.placeholder));
 
@@ -964,7 +965,8 @@ public class FormDataActivity extends AppCompatActivity {
                 ImageView imageView = findViewById(Integer.parseInt(currentImageField.getId()) * 300);
                 imageView.setImageBitmap(AppUtils.resizeBitmap(photo));
                 imageView.setVisibility(View.VISIBLE);
-                 imageView.setPadding(0,0,0,0);
+                imageView.setPadding(0,0,0,0);
+                imageView.setAdjustViewBounds(true);
 
                 String encodedImage = AppUtils.bitmapTobase64(photo);
                 postDataObject.addProperty(currentImageField.getForm_field(), encodedImage);

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center_vertical"
-    style="@style/layoutBackGroundStyle"
+    style="@style/lightBackGroundStyle"
     android:paddingBottom="10dp"
     android:gravity="center_horizontal"
     tools:context=".views.SplashScreenActivity">
@@ -14,7 +14,7 @@
         android:layout_centerInParent="true"
         android:layout_gravity="center"
         android:layout_width="150dp"
-        android:src="@drawable/uganda_svg"
+        android:src="@drawable/ministry"
         android:layout_height="150dp">
     </ImageView>
 

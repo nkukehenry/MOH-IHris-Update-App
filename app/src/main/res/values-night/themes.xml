@@ -62,8 +62,9 @@
     <style name="layoutBackGroundStyle">
         <item name="android:background">@color/layoutBackgroundDark</item>
     </style>
+
     <style name="lightBackGroundStyle">
-        <item name="android:background">@color/white</item>
+        <item name="android:background">@color/layoutBackgroundDark</item>
     </style>
 
     <style name="dateFieldStyle">
