@@ -971,9 +971,6 @@ public class FormDataActivity extends AppCompatActivity {
                 String encodedImage = AppUtils.bitmapTobase64(photo);
                 postDataObject.addProperty(currentImageField.getForm_field(), encodedImage);
 
-                TextView imageLabel = findViewById(Integer.parseInt(currentImageField.getId()));
-                imageLabel.setText(currentImageField.getLabel() + ": Attached Successfully");
-
                 Log.e(TAG, "Images  "+imageFields.size());
 
                 currentImageField = null;
