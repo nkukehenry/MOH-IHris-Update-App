@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    style="@style/layoutBackGroundStyle"
     tools:context=".views.HistoryActivity">
 
     <LinearLayout
@@ -26,6 +27,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
+            tools:listitem="@layout/history_list_item"
             android:layout_height="match_parent"
             android:id="@+id/historyRecycler"/>
 

@@ -13,8 +13,8 @@ public class AppData {
     public static List<FormEntity> allForms = new ArrayList<>();
     public static FormEntity selectedForm;
     public static DistrictEntity selectedDistrict;
-    public static CommunityWorkerEntity selectedCommunityWorker;
-    public static MinistryWorkerEntity selectedMinistryWorker;
+    public static CommunityWorkerEntity selectedCommunityWorker = null;
+    public static MinistryWorkerEntity selectedMinistryWorker = null;
     public static Boolean isCommunityWorker = false;
     public static int userId;
 }

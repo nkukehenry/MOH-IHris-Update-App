@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.moh.ihrisupdatetool.R;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppData;
+import com.moh.ihrisupdatetool.utils.AppUtils;
 import com.moh.ihrisupdatetool.utils.UIHelper;
 import com.moh.ihrisupdatetool.viewmodels.FormsViewModel;
 import com.moh.ihrisupdatetool.viewmodels.SubmissionViewModel;
@@ -41,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
         uiHelper = new UIHelper(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        AppData.selectedCommunityWorker = null;
+        AppData.selectedMinistryWorker = null;
 
         submissionViewModel = new ViewModelProvider(this).get(SubmissionViewModel.class);
         formsViewModel      = new ViewModelProvider(this).get(FormsViewModel.class);

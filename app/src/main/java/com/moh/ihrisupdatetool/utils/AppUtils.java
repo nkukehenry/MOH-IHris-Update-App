@@ -115,7 +115,7 @@ public class AppUtils {
         int height = bitmap.getHeight();
         int width = bitmap.getWidth();
 
-        float scaleWidth = ((float) width*10) / width;
+        float scaleWidth = ((float) width*8) / width;
         float scaleHeight = ((float) height*8) / height;
 
         Matrix matrix = new Matrix();

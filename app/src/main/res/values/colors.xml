@@ -10,5 +10,6 @@
     <color name="grey">#272525</color>
     <color name="signature_grey">#d1d1d1</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="layoutBackground">#e5e8da</color>
+    <color name="layoutBackgroundLight">#e5e8da</color>
+    <color name="layoutBackgroundDark">#272525</color>
 </resources>

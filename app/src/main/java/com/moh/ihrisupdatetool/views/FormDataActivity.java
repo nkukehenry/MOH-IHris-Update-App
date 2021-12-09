@@ -3,10 +3,10 @@ package com.moh.ihrisupdatetool.views;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,10 +25,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
+import com.basgeekball.awesomevalidation.ValidationHolder;
 import com.basgeekball.awesomevalidation.utility.RegexTemplate;
+import com.basgeekball.awesomevalidation.utility.custom.CustomValidation;
 import com.github.gcacace.signaturepad.views.SignaturePad;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.common.collect.Range;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -93,6 +94,9 @@ public class FormDataActivity extends AppCompatActivity {
     private Set<String> imageFields = new HashSet<>();
 
     private AwesomeValidation awesomeValidation;
+    private final int inputTopMargin = 15;
+    private final float inputLabelTextSize = 17f;
+    private final int imagePadding = 5;
 
     @Inject
     AwesomeCustomValidators customValidators;
@@ -134,7 +138,7 @@ public class FormDataActivity extends AppCompatActivity {
         selectedCommWorker = AppData.selectedCommunityWorker;
         selectedMinWorker = AppData.selectedMinistryWorker;
 
-        formsViewModel = new ViewModelProvider(this).get(FormsViewModel.class);
+        formsViewModel      = new ViewModelProvider(this).get(FormsViewModel.class);
         submissionViewModel = new ViewModelProvider(this).get(SubmissionViewModel.class);
         submitBtn = findViewById(R.id.submitBtn);
 
@@ -146,7 +150,6 @@ public class FormDataActivity extends AppCompatActivity {
     }
 
     private void prefillHealthWorkerValues() {
-
 
         //worker Type is as per selection on mainactivity
         String workerType = (AppData.isCommunityWorker)?"chw":"mhw";
@@ -183,7 +186,7 @@ public class FormDataActivity extends AppCompatActivity {
             setPostDataField("ihris_pid", selectedCommWorker.getPersonId());
             setPostDataField("primary_mobile_number", selectedCommWorker.getMobile());
             setPostDataField("national_id", selectedCommWorker.getNational_id());
-            setPostDataField("district_id", selectedCommWorker.getDistrict_id());
+            setPostDataField("district", selectedCommWorker.getDistrict());
 
         }else if (selectedMinWorker != null) {
 
@@ -199,16 +202,21 @@ public class FormDataActivity extends AppCompatActivity {
             setPostDataField("ihris_pid", selectedMinWorker.getPersonId());
             setPostDataField("primary_mobile_number", selectedMinWorker.getPhone());
             setPostDataField("national_id", selectedMinWorker.getNational_id());
-            setPostDataField("district_id", selectedMinWorker.getDistrict_id());
+            setPostDataField("district", selectedMinWorker.getDistrict());
         }
 
 
     }
 
     private void setPostDataField(String dataKey,String dataValue){
+        try {
 
-        if(dataValue!=null && !dataValue.isEmpty())
-         postDataObject.addProperty(dataKey,dataValue);
+            if (dataValue != null && !dataValue.isEmpty() && postDataObject.get(dataKey) == null)
+                postDataObject.addProperty(dataKey, dataValue);
+
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
 
     }
 
@@ -243,22 +251,34 @@ public class FormDataActivity extends AppCompatActivity {
 
                                 switch (fieldType) {
                                     case SPINNER_BASED_FIELD:
-                                        renderSpinnerBasedField(field);
+                                        try {
+                                            renderSpinnerBasedField(field);
+                                        }catch (Exception exception){}
                                         break;
                                     case DATE_FIELD:
-                                        renderDateField(field);
+                                      try{
+                                         renderDateField(field);
+                                        }catch (Exception exception){}
                                         break;
                                     case IMAGE_FIELD:
-                                        renderImageField(field);
+                                        try{
+                                            renderImageField(field);
+                                        }catch (Exception exception){}
                                         break;
                                     case TEXT_AUTOCOMPLETE_FIELD:
-                                        renderTextAutoCompleteField(field);
+                                       try{
+                                           renderTextAutoCompleteField(field);
+                                            }catch (Exception exception){}
                                         break;
                                     case SIGNATURE_FIELD:
+                                        try{
                                         renderSignatureField(field);
+                                         }catch (Exception exception){}
                                         break;
                                     default:
-                                        renderTextBasedField(field);
+                                        try{
+                                            renderTextBasedField(field);
+                                         }catch (Exception exception){}
                                         break;
                                 }
                             }
@@ -299,6 +319,7 @@ public class FormDataActivity extends AppCompatActivity {
 
         TextView fieldLabel = new TextView(this);
         fieldLabel.setText(field.getLabel());
+        fieldLabel.setTextSize(inputLabelTextSize);
         currentField.addView(fieldLabel);
 
         //Input
@@ -356,24 +377,27 @@ public class FormDataActivity extends AppCompatActivity {
     private void renderImageField(FormField field) {
 
         // Create EditText
-        TextInputLayout currentField = new TextInputLayout(this);
+        LinearLayout currentField = new LinearLayout(this);
 
         //Params
-        TextInputLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.topMargin = 8;
         params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
+        currentField.setId(Integer.parseInt(field.getId())*112);
+        currentField.setOrientation(LinearLayout.VERTICAL);
 
         //Input
         final TextView imageHolder = new TextView(currentField.getContext());
 
-        imageHolder.setPadding(25, 10, 25, 10);
+        imageHolder.setPadding(10, 10, 10, 10);
         imageHolder.setTextColor(getResources().getColor(R.color.grey));
         imageHolder.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         imageHolder.setBackgroundColor(0x00000000);
         imageHolder.setId(Integer.parseInt(field.getId()));
         imageHolder.setText("Choose " + field.getLabel());
+        imageHolder.setTextSize(inputLabelTextSize);
 
         //data already captured
         JsonElement capturedData = postDataObject.get(field.getForm_field());
@@ -388,10 +412,9 @@ public class FormDataActivity extends AppCompatActivity {
         imageView.setId(Integer.parseInt(field.getId()) * 300);
         imageView.setVisibility(View.GONE);
         imageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        imageView.setPadding(10, 30, 10, 10);
+        imageView.setPadding(10, imagePadding, 10, 5);
 
-
-        currentField.setBackgroundResource(R.drawable.placeholder);
+        currentField.setBackground( getResources().getDrawable(R.drawable.placeholder));
 
         currentField.setOnClickListener(v -> dispatchTakePictureIntent(field));
 
@@ -436,7 +459,7 @@ public class FormDataActivity extends AppCompatActivity {
         }.getType();
         List<Map<String, String>> options = gson.fromJson(field.getDefault_data(), targetType);
 
-        List<String> listOptions = new ArrayList<String>();
+        List<String> listOptions = new ArrayList<>();
 
         /**
          * Extract fields , get there values (key->value)
@@ -466,7 +489,7 @@ public class FormDataActivity extends AppCompatActivity {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.topMargin = 8;
+        params.topMargin = inputTopMargin;
         params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
@@ -474,6 +497,7 @@ public class FormDataActivity extends AppCompatActivity {
 
         TextView spinnerLabel = new TextView(this);
         spinnerLabel.setText(field.getLabel());
+        spinnerLabel.setTextSize(inputLabelTextSize);
         //spinnerOptions.add();
         //Create spinner
         Spinner spinner = new Spinner(FormDataActivity.this);
@@ -481,6 +505,7 @@ public class FormDataActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(FormDataActivity.this, R.layout.spinner_item, spinnerOptions);
         spinner.setAdapter(adapter);
         spinner.setLayoutParams(params);
+        spinner.setId(Integer.parseInt(field.getId()));
 
 
         currentField.addView(spinnerLabel);
@@ -498,13 +523,23 @@ public class FormDataActivity extends AppCompatActivity {
 
         if (element != null) {
             try {
-                Log.e(TAG, field.getForm_field() + "Spinner Value");
+//                Log.e(TAG, field.getForm_field() + "Spinner Value");
+//                String elemValue = element.getAsString();
+//
+//                int selectedIndex = getAutoSelectValueIndex(spinner,elemValue);
+//                Log.e(TAG, " value :: "+elemValue);
+//
+//                adapter.notifyDataSetChanged();
+
                 String elemValue = element.getAsString();
+                int selectedIndex = adapter.getPosition(elemValue);
 
-                int selectedIndex = getAutoSelectValueIndex(spinner,elemValue);
-                Log.e(TAG, " value :: "+elemValue);
+                Log.e(TAG,"Selected Field");
+                Log.e(TAG, String.valueOf(field));
 
-                adapter.notifyDataSetChanged();
+                Log.e(TAG,"Selected Value");
+                Log.e(TAG,spinnerOptions.get(selectedIndex));
+                spinner.setSelection(selectedIndex);
 
             } catch (Exception ex) {
                 Log.e(TAG, field.getForm_field() + " value not set");
@@ -533,7 +568,38 @@ public class FormDataActivity extends AppCompatActivity {
             }
         });
 
+        if(field.getIs_required())
+            spinnerValidation(Integer.parseInt(field.getId()));
 
+
+    }
+
+    private void spinnerValidation(int spinnerId){
+
+        awesomeValidation.addValidation(this, spinnerId, new CustomValidation() {
+            @Override
+            public boolean compare(ValidationHolder validationHolder) {
+                String selectedValue = ((Spinner) validationHolder.getView()).getSelectedItem().toString();
+                Log.e(TAG,"Spinner Selected Value:: "+selectedValue);
+                if (selectedValue.equals("Choose Option") || selectedValue.isEmpty()) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }, validationHolder -> {
+
+            TextView textViewError = (TextView) ((Spinner) validationHolder.getView()).getSelectedView();
+            textViewError.setError(validationHolder.getErrMsg());
+            textViewError.setTextColor(Color.RED);
+
+        }, validationHolder -> {
+
+            TextView textViewError = (TextView) ((Spinner) validationHolder.getView()).getSelectedView();
+            textViewError.setError(null);
+            textViewError.setTextColor(Color.BLACK);
+
+        }, R.string.not_empty);
     }
 
     private void renderDateField(FormField field) {
@@ -546,7 +612,7 @@ public class FormDataActivity extends AppCompatActivity {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.topMargin    = 8;
+        params.topMargin    = inputTopMargin;
         params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
@@ -554,6 +620,7 @@ public class FormDataActivity extends AppCompatActivity {
 
         TextView fieldLabel = new TextView(this);
         fieldLabel.setText(field.getLabel());
+        fieldLabel.setTextSize(inputLabelTextSize);
         //spinnerOptions.add();
         //Create spinner
         TextView dateField = new TextView(FormDataActivity.this);
@@ -563,6 +630,8 @@ public class FormDataActivity extends AppCompatActivity {
         //edtPass.setHint(field.getLabel());
         dateField.setBackgroundColor(0x00000000);
         dateField.setId(Integer.parseInt(field.getId()));
+        dateField.setTextAppearance(this, R.style.dateFieldStyle);
+
         //Attach adapter to spinner
         dateField.setLayoutParams(params);
         dateField.setEnabled(false);
@@ -642,7 +711,7 @@ public class FormDataActivity extends AppCompatActivity {
         }.getType();
         List<Map<String, String>> options = gson.fromJson(field.getDefault_data(), targetType);
 
-        List<String> listOptions = new ArrayList<String>();
+        List<String> listOptions = new ArrayList<>();
 
         /**
          * Extract fields , get there values (key->value)
@@ -673,7 +742,7 @@ public class FormDataActivity extends AppCompatActivity {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.topMargin = 8;
+        params.topMargin = inputTopMargin;
         params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
@@ -681,12 +750,13 @@ public class FormDataActivity extends AppCompatActivity {
 
         TextView spinnerLabel = new TextView(this);
         spinnerLabel.setText(field.getLabel());
+        spinnerLabel.setTextSize(inputLabelTextSize);
         //spinnerOptions.add();
         //Create spinner
         AutoCompleteTextView autoCompleteField = new AutoCompleteTextView(FormDataActivity.this);
         autoCompleteField.setId(Integer.parseInt(field.getId()));
         //Attach adapter to spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(FormDataActivity.this, R.layout.spinner_item, spinnerOptions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(FormDataActivity.this, R.layout.spinner_item, spinnerOptions);
         autoCompleteField.setAdapter(adapter);
         autoCompleteField.setLayoutParams(params);
 
@@ -699,6 +769,9 @@ public class FormDataActivity extends AppCompatActivity {
         //Attempt to set default item
         JsonElement element = postDataObject.get(field.getForm_field());
 
+        Log.e(TAG,"Selected Field");
+        Log.e(TAG, element.getAsString());
+
         if (element != null) {
             try {
                 String elemValue = element.getAsString();
@@ -710,8 +783,8 @@ public class FormDataActivity extends AppCompatActivity {
                 Log.e(TAG,"Selected Value");
                 Log.e(TAG,spinnerOptions.get(selectedIndex));
                 autoCompleteField.setText(spinnerOptions.get(selectedIndex));
-               AutoCompleteTextView thisTextView = findViewById(Integer.parseInt(field.getId()));
-               thisTextView.setText( spinnerOptions.get(selectedIndex) );
+                AutoCompleteTextView thisTextView = findViewById(Integer.parseInt(field.getId()));
+                thisTextView.setText( spinnerOptions.get(selectedIndex) );
 
             }catch(Exception ex){
                 Log.e(TAG,field.getForm_field() +" value not set");
@@ -742,17 +815,6 @@ public class FormDataActivity extends AppCompatActivity {
 
     }
 
-    private int getAutoSelectValueIndex(Spinner spinner, String myString) {
-        int index = 0;
-        for(int i = 0; i < spinner.getCount(); i++){
-            if(spinner.getItemAtPosition(i).toString().equals(myString)){
-                index = i;
-                break;
-            }
-        }
-        return index;
-    }
-
     private void renderSignatureField(FormField field) {
 
         // Create EditText
@@ -760,7 +822,7 @@ public class FormDataActivity extends AppCompatActivity {
 
         //Params
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.topMargin    = 8;
+        params.topMargin    = inputTopMargin;
         params.bottomMargin = 8;
 
         currentField.setLayoutParams(params);
@@ -776,11 +838,12 @@ public class FormDataActivity extends AppCompatActivity {
         signatureLabel.setBackgroundColor(0x00000000);
         signatureLabel.setText(field.getLabel());
         signatureLabel.setId( Integer.parseInt(field.getId()) *300);
+        signatureLabel.setTextSize(inputLabelTextSize);
 
         SignaturePad signaturePad = new SignaturePad(currentField.getContext(),null);
         signaturePad.setId(Integer.parseInt(field.getId()));
        // signaturePad.setVisibility(View.GONE);
-        signaturePad.setLayoutParams( new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 500));
+        signaturePad.setLayoutParams( new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 600));
         signaturePad.setPadding(10, 30, 10, 10);
         signaturePad.setPenColor( getResources().getColor(R.color.black) );
         signaturePad.setBackgroundColor( getResources().getColor(R.color.signature_grey) );
@@ -792,10 +855,10 @@ public class FormDataActivity extends AppCompatActivity {
             try {
                 String elemValue = element.getAsString();
                 Log.e(TAG,elemValue);
-                Bitmap bitmap = AppUtils.base64ToBitmap(elemValue);
+                //Bitmap bitmap = AppUtils.base64ToBitmap(elemValue);
 
-                signaturePad.setSignatureBitmap(AppUtils.resizeBitmap(bitmap));
-                signaturePad.setVisibility(View.VISIBLE);
+               // signaturePad.setSignatureBitmap(AppUtils.resizeBitmap(bitmap));
+              //  signaturePad.setVisibility(View.VISIBLE);
 
             } catch (Exception ex) {
                 // Log.e(TAG,field.getForm_field() +" value not set");
@@ -894,9 +957,14 @@ public class FormDataActivity extends AppCompatActivity {
 
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
 
+                LinearLayout wrapper = findViewById(Integer.parseInt(currentImageField.getId())*112);
+                wrapper.setBackground(null);
+                wrapper.setPadding(0,5,0,5);
+
                 ImageView imageView = findViewById(Integer.parseInt(currentImageField.getId()) * 300);
                 imageView.setImageBitmap(AppUtils.resizeBitmap(photo));
                 imageView.setVisibility(View.VISIBLE);
+                 imageView.setPadding(0,0,0,0);
 
                 String encodedImage = AppUtils.bitmapTobase64(photo);
                 postDataObject.addProperty(currentImageField.getForm_field(), encodedImage);
@@ -968,7 +1036,6 @@ public class FormDataActivity extends AppCompatActivity {
         });
     }
 
-
     private void goHome(){
 
         try {
@@ -1039,7 +1106,6 @@ public class FormDataActivity extends AppCompatActivity {
         }
         return allimagesCaptured;
     }
-
 
     @Override
     public void onBackPressed() {
