@@ -63,6 +63,8 @@ public class FormFieldsRepository {
                 //add values to the observable
                 cacheFormFields(response);
                 this.formFieldsResponse.setValue(response);
+            }else{
+                this.formFieldsResponse.setValue(null);
             }
 
         });

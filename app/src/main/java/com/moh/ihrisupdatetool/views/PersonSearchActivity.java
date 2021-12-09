@@ -77,9 +77,9 @@ public class PersonSearchActivity extends AppCompatActivity {
                 uiHelper.showLoader();
 
                 if ((AppData.isCommunityWorker)) {
-                    searchCommunityWorker(term);
+                    searchCommunityWorker(term.trim());
                 } else {
-                    searchMinistryWorker(term);
+                    searchMinistryWorker(term.trim());
                 }
             }
             });

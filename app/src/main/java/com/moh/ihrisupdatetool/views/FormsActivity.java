@@ -65,6 +65,8 @@ public class FormsActivity extends AppCompatActivity {
 
                 //FormsAdapter formsAdapter = new FormsAdapter(formsResponse, this);
                // formsRecycler.setAdapter(formsAdapter);
+            }else{
+                uiHelper.hideLoader();
             }
 
         });

@@ -26,7 +26,7 @@ public interface MinistryWorkerDao {
     @Query("SELECT * FROM min_workers WHERE surname LIKE '%' || :term || '%' OR firstname LIKE '%' || :term || '%'")
     LiveData<List<MinistryWorkerEntity>> searchWorker(String term);
 
-    @Query("SELECT * FROM min_workers WHERE ( surname LIKE '%' || :term || '%' OR firstname LIKE '%' || :term || '%') AND district like '%' || :districtName || '%'")
+    @Query("SELECT * FROM min_workers WHERE ( surname LIKE  :term || '%' OR firstname LIKE  :term || '%') AND district like '%' || :districtName || '%'")
     LiveData<List<MinistryWorkerEntity>> searchWorker(String term,String districtName);
 
     @Query("DELETE FROM min_workers")

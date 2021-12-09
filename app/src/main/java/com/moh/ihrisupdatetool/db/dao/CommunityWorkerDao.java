@@ -21,7 +21,7 @@ public interface CommunityWorkerDao {
     @Query("SELECT * FROM cw_workers")
     LiveData<List<CommunityWorkerEntity>> getCommunityWorkers();
 
-    @Query("SELECT * FROM cw_workers WHERE ( surname LIKE '%' || :term || '%' OR firstname LIKE '%' || :term || '%') AND district like '%' || :districtName || '%'")
+    @Query("SELECT * FROM cw_workers WHERE ( surname LIKE :term || '%' OR firstname LIKE  :term || '%') AND district like '%' || :districtName || '%'")
     LiveData<List<CommunityWorkerEntity>> searchWorker(String term,String districtName);
 
     @Query("DELETE FROM cw_workers")
