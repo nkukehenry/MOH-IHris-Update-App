@@ -77,6 +77,7 @@ public class MinistryWorkerRepository {
 
 
     private void  fetchFromApi(String districtName,Boolean deleteCache){
+
         genericAppRepository.get(AppConstants.GET_MINISTRY_WORKER_DATA_URL(districtName)).observeForever(o -> {
             if(o != null){
                 //convert response to required type

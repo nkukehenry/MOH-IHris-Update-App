@@ -4,6 +4,7 @@ public class AppConstants {
 
     public static  final  String SHAREDPREF_KEY= "IHRIS_TOOL";
     public static  final  String LOGIN_CODE= "LOGIN_CODE";
+    public static  final  String USER_CODE= "USER_CODE";
     public static  final  String SELECTED_FORM ="selectedForm";
     public  static  final String BASE_URL  ="https://mobileihris.health.go.ug/api/data/";
     public  static  final String BASE_URL2 ="https://hris2.health.go.ug/api_systems/index.php/api/";
@@ -20,5 +21,5 @@ public class AppConstants {
     public static String GET_MINISTRY_WORKER_DATA_URL(String districtName) { return  String.format("%s%s%s",BASE_URL3,"hwdata/",districtName);}
     public static String GET_COMMUNITY_WORKER_DATA_URL(String districtName) { return String.format("%s%s%s",BASE_URL2,"chwdata/",districtName);}
 
-    public static String GET_LOGIN_BYCODE(String userCode) { return String.format("%s%s%s",BASE_URL,"auth/",userCode); }
+    public static String GET_LOGIN_BYCODE(int userCode) { return String.format("%s%s%s",BASE_URL,"auth/",userCode); }
 }

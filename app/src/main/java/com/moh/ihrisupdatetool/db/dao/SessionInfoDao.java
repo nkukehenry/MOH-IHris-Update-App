@@ -19,6 +19,9 @@ public interface SessionInfoDao {
     @Query("SELECT * FROM session")
     LiveData<List<SessionInfoEntity>> getSessionInfo();
 
+    @Query("SELECT * FROM session where code = :userCode")
+    LiveData<SessionInfoEntity> getUserSessionInfo(int userCode);
+
     @Query("DELETE FROM session")
     void deleteAll();
 }

@@ -4,6 +4,7 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.moh.ihrisupdatetool.db.entities.SessionInfoEntity;
@@ -26,11 +27,10 @@ public class LoginViewModel extends AndroidViewModel {
         this.loginRepository = loginRepository;
     }
 
-    public MutableLiveData<SessionInfoEntity> observeLoginReponse(){
-        return this.loginRepository.observeLoginResponse();
+
+    public LiveData<SessionInfoEntity> doLogin(int userCode){
+       return this.loginRepository.doLogin(userCode);
     }
 
-    public void doLogin(String userCode){
-        this.loginRepository.doLogin(userCode);
-    }
+
 }

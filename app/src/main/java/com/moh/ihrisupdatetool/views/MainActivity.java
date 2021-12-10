@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moh.ihrisupdatetool.R;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private FormsViewModel formsViewModel;
     private UIHelper uiHelper;
     private int exitCounter;
+     private  TextView userName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,10 @@ public class MainActivity extends AppCompatActivity {
 
         AppData.selectedCommunityWorker = null;
         AppData.selectedMinistryWorker = null;
+        AppData.isDataUpdate = false;
+
+        userName = findViewById(R.id.userName);
+        userName.setText("Hello "+AppData.session.getName());
 
         submissionViewModel = new ViewModelProvider(this).get(SubmissionViewModel.class);
         formsViewModel      = new ViewModelProvider(this).get(FormsViewModel.class);

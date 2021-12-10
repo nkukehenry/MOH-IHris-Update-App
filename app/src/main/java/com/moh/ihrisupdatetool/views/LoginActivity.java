@@ -51,24 +51,38 @@ public class LoginActivity extends AppCompatActivity {
             userCode = userCodeTxt.getText().toString();
 
             if(!userCode.isEmpty()){
-                postLogin(userCode);
+                try {
+                    postLogin(Integer.parseInt(userCode));
+                }catch (Exception ex){
+                    Toast.makeText(LoginActivity.this, "Provide a valid usercode", Toast.LENGTH_SHORT).show();
+
+                }
             }else {
                 Toast.makeText(LoginActivity.this, "Provide a usercode", Toast.LENGTH_SHORT).show();
             }
         });
 
-        observerLoginResponse();
     }
 
 
-    private void observerLoginResponse() {
+    private void cacheLogin(int userCode,int code){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(AppConstants.LOGIN_CODE,userCode);
+        editor.putInt(AppConstants.USER_CODE,code);
+        editor.commit();
+    }
 
-        loginViewModel.observeLoginReponse().observe(this,loginReponse->{
+    private void postLogin(int userCode){
+
+        this.loginViewModel.doLogin(userCode).observe(this, loginReponse->{
+
             uiHelper.hideLoader();
-            if(loginReponse!=null && loginReponse.getStatus()==1){
-                AppData.userId = loginReponse.getUserId();
 
-                cacheLogin(AppData.userId);
+            if(loginReponse!=null && loginReponse.getStatus() == 1){
+                AppData.userId = loginReponse.getUserId();
+                AppData.session = loginReponse;
+
+                cacheLogin(AppData.userId,Integer.parseInt((loginReponse.getCode())));
 
                 Intent mainActivity = new Intent(this,MainActivity.class);
                 startActivity(mainActivity);
@@ -76,16 +90,7 @@ public class LoginActivity extends AppCompatActivity {
             }else{
                 Toast.makeText(LoginActivity.this, "Login failed try again", Toast.LENGTH_SHORT).show();
             }
+
         });
-    }
-
-    private void cacheLogin(int userCode){
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(AppConstants.LOGIN_CODE,userCode);
-        editor.commit();
-    }
-
-    private void postLogin(String userCode){
-        this.loginViewModel.doLogin(userCode);
     }
 }

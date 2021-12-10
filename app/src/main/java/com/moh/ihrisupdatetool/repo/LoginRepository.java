@@ -2,6 +2,7 @@ package com.moh.ihrisupdatetool.repo;
 
 import android.os.AsyncTask;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
@@ -24,54 +25,57 @@ public class LoginRepository {
     private MutableLiveData<SessionInfoEntity> loginResponse;
     private IAppRemoteCallRepository remoteCallRepository;
     private SessionInfoDao sessionInfoDao;
+    private Boolean isObserved=false;
 
     @Inject
     public LoginRepository(IAppRemoteCallRepository remoteCallRepository,SessionInfoDao sessionInfoDao) {
-        this.loginResponse = loginResponse;
         this.remoteCallRepository = remoteCallRepository;
-        this.loginResponse = new MutableLiveData<>();
         this.sessionInfoDao =  sessionInfoDao;
+        this.loginResponse = new MutableLiveData<>();
     }
 
-    public MutableLiveData<SessionInfoEntity> observeLoginResponse() {
-        return loginResponse;
-    }
+    public LiveData<SessionInfoEntity> doLogin(int userCode) {
 
-    public void doLogin(String userCode) {
+        sessionInfoDao.getUserSessionInfo(userCode).observeForever(sessionInfoEntities -> {
 
-        sessionInfoDao.getSessionInfo().observeForever(sessionInfoEntities -> {
+            System.out.println(sessionInfoEntities);
 
-           if(sessionInfoEntities.isEmpty()){
-               doRemoteLogin(userCode);
-           }else{
-               loginResponse.postValue(sessionInfoEntities.get(0));
-           }
+               if(sessionInfoEntities == null && !isObserved){
+                   doRemoteLogin(userCode);
+               }else{
+                   loginResponse.setValue(sessionInfoEntities);
+               }
         });
 
+        sessionInfoDao.getUserSessionInfo(userCode).removeObserver(formEntities -> { });
+        return loginResponse;
+
     }
 
-    private void doRemoteLogin(String userCode){
+    private void doRemoteLogin(int userCode){
+
         this.remoteCallRepository.get(AppConstants.GET_LOGIN_BYCODE(userCode)).observeForever(o -> {
 
             if(o != null) {
+                isObserved = true;
                 //convert response to required type
-                Type genType = new TypeToken<SessionInfoEntity>() {
-                }.getType();
+                Type genType = new TypeToken<SessionInfoEntity>() { }.getType();
                 SessionInfoEntity response = AppUtils.objectToType(o, genType);
 
                 if(response.getStatus() == 1){
+                    response.setCode(String.valueOf(userCode));
                     cacheSession(response);
-                    loginResponse.postValue(response);
+                    loginResponse.setValue(response);
                 }else{
-                    loginResponse.postValue(null);
+                    loginResponse.setValue(null);
                 }
 
+            }else{
+                loginResponse.setValue(null);
             }
         });
 
     }
-
-
 
     private void  cacheSession(SessionInfoEntity sessionInfoEntity){
         new LoginRepository.InsetAsyncTask(sessionInfoDao).execute(sessionInfoEntity);

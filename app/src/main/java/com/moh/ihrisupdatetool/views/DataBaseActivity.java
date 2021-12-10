@@ -103,12 +103,14 @@ public class DataBaseActivity extends AppCompatActivity {
         if(AppData.isDataUpdate && !isUpdateLoaded){ //if update , just load the data
             loadOldRecord();
         }else{
+
+            if(!AppData.isDataUpdate) {
+                postDataObject = new JsonObject();
+            }
+
             postDataObject.addProperty("reference", AppUtils.getRandomString(11)+userId);
         }
 
-        if(!AppData.isDataUpdate) {
-            postDataObject = new JsonObject();
-        }
         postDataObject.addProperty("user_id", userId);
 
         List<FormEntity> forms = AppData.allForms;
