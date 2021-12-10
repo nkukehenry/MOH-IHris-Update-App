@@ -1,6 +1,7 @@
 package com.moh.ihrisupdatetool.adapaters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,8 +9,12 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.moh.ihrisupdatetool.R;
 import com.moh.ihrisupdatetool.databinding.HistoryListBinding;
 import com.moh.ihrisupdatetool.db.entities.DataEntryTemplate;
+import com.moh.ihrisupdatetool.utils.AppData;
+import com.moh.ihrisupdatetool.views.FormsActivity;
+import com.moh.ihrisupdatetool.views.HistoryActivity;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +24,7 @@ public class HistoryListAdapter extends RecyclerView.Adapter<HistoryListAdapter.
 
 
     List<DataEntryTemplate> data;
-    Context context;
+    static Context context;
     private LayoutInflater inflater;
 
     public HistoryListAdapter(List<DataEntryTemplate> data, Context context){
@@ -59,6 +64,14 @@ public class HistoryListAdapter extends RecyclerView.Adapter<HistoryListAdapter.
             View view = historyListBinding.getRoot();
             view.setOnClickListener(this);
             this.historyListBinding = historyListBinding;
+
+            view.findViewById(R.id.updateRecord).setOnClickListener(v -> {
+               AppData.updateRecord = historyListBinding.getRecord().getFormdata();
+               AppData.isDataUpdate = true;
+               Intent formsIntent = new Intent(context,FormsActivity.class);
+               context.startActivity(formsIntent);
+            }
+            );
         }
 
         public void bind(DataEntryTemplate row){
@@ -68,6 +81,7 @@ public class HistoryListAdapter extends RecyclerView.Adapter<HistoryListAdapter.
         @Override
         public void onClick(View v) {
             //re-render data n form
+
         }
     }
 }

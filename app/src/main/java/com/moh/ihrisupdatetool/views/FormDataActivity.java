@@ -36,23 +36,20 @@ public class FormDataActivity extends DataBaseActivity {
         uiHelper = new UIHelper(this);
         simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd ", Locale.US);
 
+         userId = String.valueOf(AppData.userId);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_fields);
 
         try{
             initAcitvity();
         }catch(Exception ex){
+            ex.printStackTrace();
             uiHelper.showDialog(ex.getMessage());
         }
     }
 
     private void initAcitvity(){
-
-        String userId = String.valueOf(AppData.userId);
-
-        postDataObject = new JsonObject();
-        postDataObject.addProperty("reference", AppUtils.getRandomString(11)+userId);
-        postDataObject.addProperty("user_id",userId);
 
         nextFormButton = findViewById(R.id.nextFormBtn);
         prevFormButton = findViewById(R.id.previousFormBtn);
@@ -83,7 +80,7 @@ public class FormDataActivity extends DataBaseActivity {
 
         if (!awesomeValidation.validate()) return;
 
-        if(  !validateImagesRequired() ) {
+        if(  !validateImagesRequired(false) ) {
             //check if all image fields have been satifies
             Toast.makeText(this, "Provide the required "+imageFields.size()+" images ", Toast.LENGTH_LONG).show();
             return;
@@ -102,6 +99,7 @@ public class FormDataActivity extends DataBaseActivity {
         submissionViewModel.postData(postDataObject).observe(this, submissionResponse -> {
             goHome();
         });
+
     }
 
     private void goHome(){
@@ -126,7 +124,7 @@ public class FormDataActivity extends DataBaseActivity {
             return;
         }
 
-        if(  !validateImagesRequired() ) {
+        if(  !validateImagesRequired(true) ) {
             //check if all image fields have been satifies
             Toast.makeText(this, "Provide the required  image(s) ", Toast.LENGTH_LONG).show();
             return;
@@ -172,7 +170,7 @@ public class FormDataActivity extends DataBaseActivity {
         }
     }
 
-    private Boolean validateImagesRequired() {
+    private Boolean validateImagesRequired(Boolean isPartial) {
         Boolean allimagesCaptured = true;
 
         for (Iterator<String> it = imageFields.iterator(); it.hasNext(); ) {
@@ -181,7 +179,7 @@ public class FormDataActivity extends DataBaseActivity {
                 allimagesCaptured = false;
             else continue;
         }
-        return allimagesCaptured;
+        return (isPartial && imageFields.size() >1)?true: allimagesCaptured;
     }
 
     @Override

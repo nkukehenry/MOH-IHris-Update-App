@@ -92,15 +92,24 @@ public class DataBaseActivity extends AppCompatActivity {
      final int inputTopMargin = 15;
      final float inputLabelTextSize = 17f;
      final int imagePadding = 5;
+      Boolean isUpdateLoaded=false;
+      String userId;
 
     @Inject
     AwesomeCustomValidators customValidators;
 
     public void prefillHealthWorkerValues() {
 
-        //worker Type is as per selection on mainactivity
-        String workerType = (AppData.isCommunityWorker)?"chw":"mhw";
-        postDataObject.addProperty("hw_type",workerType);
+        if(AppData.isDataUpdate && !isUpdateLoaded){ //if update , just load the data
+            loadOldRecord();
+        }else{
+            postDataObject.addProperty("reference", AppUtils.getRandomString(11)+userId);
+        }
+
+        if(!AppData.isDataUpdate) {
+            postDataObject = new JsonObject();
+        }
+        postDataObject.addProperty("user_id", userId);
 
         List<FormEntity> forms = AppData.allForms;
         int currentFormIndex = forms.indexOf(selectedForm);
@@ -115,6 +124,12 @@ public class DataBaseActivity extends AppCompatActivity {
         }
         else{
             prevFormButton.setEnabled(true);
+        }
+
+        if(!AppData.isDataUpdate){
+            //worker Type is as per selection on mainactivity
+            String workerType = (AppData.isCommunityWorker)?"chw":"mhw";
+            postDataObject.addProperty("hw_type",workerType);
         }
 
         Log.e(TAG,"Worker Here");
@@ -153,6 +168,11 @@ public class DataBaseActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    public void loadOldRecord(){
+        isUpdateLoaded = false;
+        postDataObject = AppData.updateRecord;
     }
 
     public void setPostDataField(String dataKey,String dataValue){

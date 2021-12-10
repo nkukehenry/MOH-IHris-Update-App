@@ -1,5 +1,6 @@
 package com.moh.ihrisupdatetool.utils;
 
+import com.google.gson.JsonObject;
 import com.moh.ihrisupdatetool.db.entities.CommunityWorkerEntity;
 import com.moh.ihrisupdatetool.db.entities.DistrictEntity;
 import com.moh.ihrisupdatetool.db.entities.FormEntity;
@@ -17,4 +18,6 @@ public class AppData {
     public static MinistryWorkerEntity selectedMinistryWorker = null;
     public static Boolean isCommunityWorker = false;
     public static int userId;
+    public static boolean isDataUpdate=false;
+    public static JsonObject updateRecord;
 }
