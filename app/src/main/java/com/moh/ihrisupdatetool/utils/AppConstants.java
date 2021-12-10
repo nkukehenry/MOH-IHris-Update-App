@@ -5,6 +5,7 @@ public class AppConstants {
     public static  final  String SHAREDPREF_KEY= "IHRIS_TOOL";
     public static  final  String LOGIN_CODE= "LOGIN_CODE";
     public static  final  String USER_CODE= "USER_CODE";
+    public static  final  String APP_VERSION= "3.0";
     public static  final  String SELECTED_FORM ="selectedForm";
     public  static  final String BASE_URL  ="https://mobileihris.health.go.ug/api/data/";
     public  static  final String BASE_URL2 ="https://hris2.health.go.ug/api_systems/index.php/api/";
