@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
 import com.google.gson.reflect.TypeToken;
+import com.moh.ihrisupdatetool.db.dao.CommunityWorkerDao;
 import com.moh.ihrisupdatetool.db.dao.JobsDao;
 import com.moh.ihrisupdatetool.db.dao.SessionInfoDao;
 import com.moh.ihrisupdatetool.db.entities.JobEntity;
@@ -35,10 +36,8 @@ public class LoginRepository {
     }
 
     public LiveData<SessionInfoEntity> doLogin(int userCode) {
-
+        isObserved = false;
         sessionInfoDao.getUserSessionInfo(userCode).observeForever(sessionInfoEntities -> {
-
-            System.out.println(sessionInfoEntities);
 
                if(sessionInfoEntities == null && !isObserved){
                    doRemoteLogin(userCode);
@@ -81,6 +80,7 @@ public class LoginRepository {
         new LoginRepository.InsetAsyncTask(sessionInfoDao).execute(sessionInfoEntity);
     }
 
+
     static class InsetAsyncTask extends AsyncTask<SessionInfoEntity, Void, Void> {
         private SessionInfoDao sessionInfoDao;
 
@@ -90,6 +90,24 @@ public class LoginRepository {
         @Override
         protected Void doInBackground(SessionInfoEntity... sessionInfoEntities) {
             sessionInfoDao.insert(sessionInfoEntities[0]);
+            return null;
+        }
+    }
+
+    public void  deleteSession(){
+        new LoginRepository.DeleteAsyncTask(sessionInfoDao).execute();
+    }
+
+
+    static class DeleteAsyncTask extends AsyncTask<Void, Void, Void> {
+        private SessionInfoDao sessionInfoDao;
+
+        public DeleteAsyncTask(SessionInfoDao sessionInfoDao) {
+            this.sessionInfoDao = sessionInfoDao;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            sessionInfoDao.deleteAll();
             return null;
         }
     }

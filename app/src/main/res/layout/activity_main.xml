@@ -19,6 +19,7 @@
             android:padding="10dp"
             android:layout_width="match_parent"
             android:id="@+id/userName"
+            style="@style/boldText"
             android:text="..."
             android:layout_height="wrap_content"
             ></TextView>

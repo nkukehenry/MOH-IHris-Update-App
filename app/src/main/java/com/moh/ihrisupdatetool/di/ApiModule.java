@@ -82,7 +82,7 @@ public class ApiModule {
                 .addInterceptor(apiInterceptor)
                 .addInterceptor(loggingInterceptor)
                 .hostnameVerifier(hostnameVerifier)
-                .retryOnConnectionFailure(false)
+                //.retryOnConnectionFailure(false)
                 .build();
     }
 

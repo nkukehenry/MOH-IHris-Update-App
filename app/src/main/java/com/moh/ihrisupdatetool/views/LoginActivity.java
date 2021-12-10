@@ -48,10 +48,13 @@ public class LoginActivity extends AppCompatActivity {
 
         loginBtn.setOnClickListener(v -> {
 
+
+
             userCode = userCodeTxt.getText().toString();
 
             if(!userCode.isEmpty()){
                 try {
+                    uiHelper.showLoader("Logging you in");
                     postLogin(Integer.parseInt(userCode));
                 }catch (Exception ex){
                     Toast.makeText(LoginActivity.this, "Provide a valid usercode", Toast.LENGTH_SHORT).show();

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,6 +21,7 @@ import com.moh.ihrisupdatetool.utils.AppData;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 import com.moh.ihrisupdatetool.utils.UIHelper;
 import com.moh.ihrisupdatetool.viewmodels.FormsViewModel;
+import com.moh.ihrisupdatetool.viewmodels.LoginViewModel;
 import com.moh.ihrisupdatetool.viewmodels.SubmissionViewModel;
 import com.moh.ihrisupdatetool.viewmodels.WorkersViewModel;
 
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private WorkersViewModel workersViewModel;
     private SubmissionViewModel submissionViewModel;
     private FormsViewModel formsViewModel;
+    private LoginViewModel loginViewModel;
     private UIHelper uiHelper;
     private int exitCounter;
      private  TextView userName;
@@ -50,11 +53,12 @@ public class MainActivity extends AppCompatActivity {
         AppData.isDataUpdate = false;
 
         userName = findViewById(R.id.userName);
-        userName.setText("Hello "+AppData.session.getName());
+        userName.setText("Hello "+AppData.session.getName()+ " - "+AppData.session.getCode());
 
         submissionViewModel = new ViewModelProvider(this).get(SubmissionViewModel.class);
         formsViewModel      = new ViewModelProvider(this).get(FormsViewModel.class);
         workersViewModel    = new ViewModelProvider(this).get(WorkersViewModel.class);
+        loginViewModel      = new ViewModelProvider(this).get(LoginViewModel.class);
 
     }
 
@@ -162,14 +166,29 @@ public class MainActivity extends AppCompatActivity {
 
     private void logOut(){
 
+        uiHelper.showLoader("Logging out");
+
         SharedPreferences sharedPreferences = getSharedPreferences(AppConstants.SHAREDPREF_KEY, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        SharedPreferences.Editor editor     = sharedPreferences.edit();
         editor.remove(AppConstants.LOGIN_CODE);
         editor.commit();
 
-        Intent  loginIntent=new Intent(MainActivity.this, LoginActivity.class );
-        startActivity(loginIntent);
-        finishAffinity();
+        loginViewModel.deleteSession();
+
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                uiHelper.hideLoader();
+
+                Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(loginIntent);
+                finishAffinity();
+
+            }
+        },3000);
+
 
     }
 

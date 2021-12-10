@@ -32,5 +32,9 @@ public class LoginViewModel extends AndroidViewModel {
        return this.loginRepository.doLogin(userCode);
     }
 
+    public  void deleteSession(){
+        this.loginRepository.deleteSession();
+    }
+
 
 }

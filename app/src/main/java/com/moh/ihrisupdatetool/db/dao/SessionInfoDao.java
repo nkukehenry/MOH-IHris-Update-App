@@ -16,9 +16,6 @@ public interface SessionInfoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(SessionInfoEntity sessionInfoEntity);
 
-    @Query("SELECT * FROM session")
-    LiveData<List<SessionInfoEntity>> getSessionInfo();
-
     @Query("SELECT * FROM session where code = :userCode")
     LiveData<SessionInfoEntity> getUserSessionInfo(int userCode);
 
