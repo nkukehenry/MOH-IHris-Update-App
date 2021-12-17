@@ -30,6 +30,7 @@ public class FormField {
     private Boolean is_disabled;
     private Integer max_value;
     private Integer min_value;
+    private Integer min_constraint;
 
     @NonNull
     public String getId() {
@@ -142,6 +143,14 @@ public class FormField {
 
     public void setMin_value(Integer min_value) {
         this.min_value = min_value;
+    }
+
+    public Integer getMin_constraint() {
+        return min_constraint;
+    }
+
+    public void setMin_constraint(Integer min_constraint) {
+        this.min_constraint = min_constraint;
     }
 
     @Override

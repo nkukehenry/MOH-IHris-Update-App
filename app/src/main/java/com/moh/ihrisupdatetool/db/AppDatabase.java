@@ -32,7 +32,7 @@ import com.moh.ihrisupdatetool.db.entities.SessionInfoEntity;
         ,FormField.class
         ,DataEntryTemplate.class
         , SessionInfoEntity.class
-     }, version = 25,exportSchema = false)
+     }, version = 28,exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract FacilitiesDao facilitiesDao();

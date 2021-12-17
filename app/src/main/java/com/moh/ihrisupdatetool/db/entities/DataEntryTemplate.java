@@ -105,7 +105,7 @@ public class DataEntryTemplate implements Serializable {
     }
 
     public String getUploadStatus() {
-        return (status==1)?"UPLOADED":"NOT UPLOADED";
+        return (isUploaded)?"UPLOADED":"NOT UPLOADED";
     }
 
     public String getDisplayField1() {

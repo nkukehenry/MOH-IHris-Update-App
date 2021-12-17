@@ -27,5 +27,10 @@ public class AwesomeCustomValidators {
         return input -> input.length() <= maxLength;
     }
 
+    public static  SimpleCustomValidation minLengthValidator(Integer minLength)
+    {
+        return input -> input.length() >= minLength;
+    }
+
 
 }

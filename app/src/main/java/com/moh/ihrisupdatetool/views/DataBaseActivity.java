@@ -103,7 +103,6 @@ public class DataBaseActivity extends AppCompatActivity {
 
     public void prefillHealthWorkerValues() {
 
-
         postDataObject.addProperty("user_id", userId);
 
         List<FormEntity> forms = AppData.allForms;
@@ -128,6 +127,9 @@ public class DataBaseActivity extends AppCompatActivity {
         }
 
         Log.e(TAG,"Worker Here");
+
+        if(AppData.selectedDistrict !=null )
+        setPostDataField("district",AppData.selectedDistrict.getDistrictName());
 
         if (selectedCommWorker != null) {
 
@@ -221,7 +223,8 @@ public class DataBaseActivity extends AppCompatActivity {
 
         dynamicFieldsWrapper.addView(currentField);
 
-        Integer  lengthConstrait  = field.getDb_constraint();
+        Integer  maxConstrait  = field.getDb_constraint();
+        Integer  minConstrait  = field.getMin_constraint();
 
         JsonElement element = postDataObject.get(field.getForm_field());
 
@@ -247,9 +250,11 @@ public class DataBaseActivity extends AppCompatActivity {
         if(field.getIs_required())
             awesomeValidation.addValidation(this, Integer.parseInt(field.getId()), RegexTemplate.NOT_EMPTY, R.string.not_empty);
 
-        if(lengthConstrait > 0)
-            awesomeValidation.addValidation(this, Integer.parseInt(field.getId()),customValidators.maxLengthValidator(lengthConstrait),R.string.too_short);
+        if(maxConstrait > 0)
+            awesomeValidation.addValidation(this, Integer.parseInt(field.getId()),customValidators.maxLengthValidator(maxConstrait),R.string.too_short);
 
+        if(minConstrait != null && minConstrait > 0)
+            awesomeValidation.addValidation(this, Integer.parseInt(field.getId()),customValidators.minLengthValidator(minConstrait),R.string.input_too_short);
 
 
     }
