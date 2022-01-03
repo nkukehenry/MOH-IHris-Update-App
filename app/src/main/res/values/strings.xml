@@ -11,6 +11,7 @@
     <string name="login">LOGIN</string>
     <string name="not_empty">This filed is required</string>
     <string name="too_short">Input value too long </string>
+    <string name="input_too_short">Input value too short</string>
     <string name="invalid_characters">Invalid character input </string>
     <string name="logout">Logout</string>
 </resources>

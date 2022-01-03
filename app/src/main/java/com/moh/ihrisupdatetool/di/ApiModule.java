@@ -35,6 +35,7 @@ import static com.moh.ihrisupdatetool.utils.AppConstants.BASE_URL;
 @InstallIn(SingletonComponent.class)
 public class ApiModule {
 
+
     @Singleton
     @Provides
     public AppApi provideAppApiApiService(Retrofit retrofit){
@@ -82,7 +83,7 @@ public class ApiModule {
                 .addInterceptor(apiInterceptor)
                 .addInterceptor(loggingInterceptor)
                 .hostnameVerifier(hostnameVerifier)
-                //.retryOnConnectionFailure(false)
+                .retryOnConnectionFailure(false)
                 .build();
     }
 
