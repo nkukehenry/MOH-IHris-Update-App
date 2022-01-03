@@ -25,6 +25,38 @@ public class AppRemoteCallRepository implements IAppRemoteCallRepository {
         this.appApi = appApi;
     }
 
+    @Override
+    public <T> T postSync(String url, Object model) {
+
+        final MutableLiveData<T> data = new MutableLiveData<>();
+
+        appApi.post(url, model).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if(!response.isSuccessful()){
+                    data.setValue(null);
+                }
+
+                Type genType = new TypeToken<T>() {}.getType();
+                try {
+                    T results = AppUtils.objectToType(response.body(), genType);
+                    data.setValue(results);
+                }catch(Exception exception){
+                    data.setValue(null);
+                    exception.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                data.postValue( null );
+            }
+        });
+
+        return data.getValue();
+    }
+
     public <T> LiveData<T> post(String url, Object model){
         final MutableLiveData<T> data = new MutableLiveData<>();
 

@@ -15,6 +15,7 @@ import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppUtils;
 
 import java.lang.reflect.Type;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -89,6 +90,49 @@ public class DataSubmissionRepository {
 
         });
         return submissionResponse;
+    }
+
+    public JsonObject syncDataSync(){
+
+       List<DataEntryTemplate> records= dataEntryDao.getLocalRecordsSync();
+
+            JsonObject resp = new JsonObject();
+
+            if( !records.isEmpty() ) {
+
+                for (DataEntryTemplate record :records) {
+
+                    if(record.getStatus() == 0)
+                        postDataSync(record.getFormdata());
+
+                    resp.addProperty("state",true);
+                    resp.addProperty("isUploaded",true);
+                }
+
+            }else{
+                resp.addProperty("state",false);
+            }
+
+        return resp;
+    }
+
+    public JsonObject  postDataSync(JsonObject postData){
+;
+        cacheFormData(postData,false);
+
+        Object response = genericAppRepository.postSync(AppConstants.POST_FORM_DATA_URL(),postData);
+
+        JsonObject resp=null;
+            if(response!= null){
+                //convert response to required type
+                Type genType = new TypeToken<JsonObject>() {}.getType();
+                 resp = AppUtils.objectToType(response,genType);
+                //add values to the observable
+                //set marked uploaded
+                cacheFormData(postData,true);
+            }
+
+        return resp;
     }
 
 

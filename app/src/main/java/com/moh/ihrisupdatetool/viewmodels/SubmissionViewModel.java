@@ -39,6 +39,10 @@ public class SubmissionViewModel extends AndroidViewModel {
         return dataSubmissionRepository.syncData();
     }
 
+    public JsonObject syncDataSync(){
+        return dataSubmissionRepository.syncDataSync();
+    }
+
     public Boolean deleteData(){
         return dataSubmissionRepository.deleteAll();
     }

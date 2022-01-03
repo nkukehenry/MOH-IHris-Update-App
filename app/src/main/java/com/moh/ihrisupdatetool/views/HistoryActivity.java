@@ -12,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
 import com.moh.ihrisupdatetool.R;
 import com.moh.ihrisupdatetool.adapaters.HistoryListAdapter;
 import com.moh.ihrisupdatetool.utils.UIHelper;
@@ -70,10 +71,30 @@ public class HistoryActivity extends AppCompatActivity {
 
     }
 
+
+    private void postSync2(){
+        //submission
+        //syncDataSync
+        JsonObject submissionResponse = submissionViewModel.syncDataSync();
+                //.observe( this,submissionResponse->{
+            try {
+                String msg = "Sync finished successfully";
+
+                if (!submissionResponse.get("state").getAsBoolean())
+                    msg = "There wasn't any unsynchronized data";
+
+                uiHelper.hideLoader();
+                uiHelper.showDialog(msg);
+
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+    }
+
+
     private void deleteLocalData(){
         //submission
         submissionViewModel.syncData();
-
     }
 
 
@@ -96,7 +117,7 @@ public class HistoryActivity extends AppCompatActivity {
         uiHelper.showLoader("Synchronizing data...");
 
         try {
-            postSync();
+            postSync2();
         }catch(Exception ex){
             ex.printStackTrace();
         }

@@ -79,7 +79,7 @@ public class FormDataActivity extends DataBaseActivity {
         uiHelper = new UIHelper(this);
         simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd ", Locale.US);
 
-         userId = String.valueOf(AppData.session.getUserId());
+        userId = String.valueOf(AppData.session.getUserId());
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_fields);
@@ -209,7 +209,6 @@ public class FormDataActivity extends DataBaseActivity {
         }
 
         postDataObject.addProperty("app_version", AppConstants.APP_VERSION);
-
 
         submitBtn.setOnClickListener(v -> {
             onSubmitClicked();

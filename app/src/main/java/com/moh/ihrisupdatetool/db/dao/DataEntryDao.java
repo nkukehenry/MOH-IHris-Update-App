@@ -23,6 +23,9 @@ public interface DataEntryDao {
     @Query("SELECT * FROM form_data WHERE status = 0")
     LiveData<List<DataEntryTemplate>> getLocalRecords();
 
+    @Query("SELECT * FROM form_data WHERE status = 0")
+    List<DataEntryTemplate> getLocalRecordsSync();
+
     @Query("SELECT * FROM form_data")
     LiveData<DataEntryTemplate> getFormData();
 
