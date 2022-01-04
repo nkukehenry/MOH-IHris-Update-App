@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
 import com.moh.ihrisupdatetool.R;
 import com.moh.ihrisupdatetool.utils.AppConstants;
 import com.moh.ihrisupdatetool.utils.AppData;
@@ -78,30 +79,28 @@ public class MainActivity extends AppCompatActivity {
 
     private void syncData() {
         //submission
-        submissionViewModel.syncData().observe(this, submissionResponse -> {
-             uiHelper.hideLoader();
-            try {
-                String msg = "Sync finished successfully";
+        //syncDataSync
+        JsonObject submissionResponse = submissionViewModel.syncDataSync();
+        //.observe( this,submissionResponse->{
+        try {
+            String msg = "Sync finished successfully";
 
-                if (!submissionResponse.get("state").getAsBoolean())
-                    msg = "There wasn't any unsynchronized data";
+            if (!submissionResponse.get("state").getAsBoolean())
+                msg = "There wasn't any unsynchronized data";
 
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            uiHelper.hideLoader();
+            uiHelper.showDialog(msg);
 
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-        });
+        }catch (Exception ex){
+            ex.printStackTrace();
+            uiHelper.showDialog("Sysnchronization Failed. Reaason: "+ex.getMessage());
+        }
     }
 
     private void syncCollectedLocalData(){
-        uiHelper.showLoader("Synchronizing data...");
-                try {
-                    syncData();
-                }catch(Exception ex){
-                    ex.printStackTrace();
-                }
+        String msg = "This action was moved to  History, ";
+        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+        goToHistory();
     }
 
     private void syncResources(){

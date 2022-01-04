@@ -11,19 +11,21 @@
         android:id="@+id/historyHeading"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
+        android:orientation="vertical"
         android:layout_height="wrap_content">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:textSize="17sp"
-        android:text="Data Collection History"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/allRecords"
+            android:padding="10dp"
+            android:textSize="14sp"
+            android:text="Records: 0"/>
     </LinearLayout>
 
     <ScrollView
         app:layout_constraintTop_toBottomOf="@+id/historyHeading"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"

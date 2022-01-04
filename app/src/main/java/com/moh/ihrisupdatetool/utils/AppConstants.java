@@ -5,7 +5,7 @@ public class AppConstants {
     public static  final  String SHAREDPREF_KEY= "IHRIS_TOOL";
     public static  final  String LOGIN_CODE= "LOGIN_CODE";
     public static  final  String USER_CODE= "USER_CODE";
-    public static  final  String APP_VERSION= "3.0";
+    public static  final  String APP_VERSION= "1.4";
     public static  final  String SELECTED_FORM ="selectedForm";
     public  static  final String BASE_URL  ="https://mobileihris.health.go.ug/api/data/";
     //public  static  final String BASE_URL  ="https://mobileihris.health.go.ug/ihris_tool_demo/api/data/";
@@ -18,7 +18,7 @@ public class AppConstants {
     public static String GET_FORMS_URL() { return String.format("%s%s",BASE_URL,"forms"); }
     public static String GET_FORM_FIELDS_URL(Integer formId) { return String.format("%s%s%s",BASE_URL,"fields/",formId); }
 
-    public static String POST_FORM_DATA_URL() { return String.format("%s%s",BASE_URL,"create"); }
+    public static String POST_FORM_DATA_URL() { return String.format("%s%s",BASE_URL,"new_create"); }
 
     public static String GET_MINISTRY_WORKER_DATA_URL(String districtName) { return  String.format("%s%s%s",BASE_URL3,"hwdata/",districtName);}
     public static String GET_COMMUNITY_WORKER_DATA_URL(String districtName) { return String.format("%s%s%s",BASE_URL2,"chwdata/",districtName);}
