@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moh.ihrisupdatetool.R;
@@ -23,14 +24,16 @@ public class SplashScreenActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
     LoginViewModel loginViewModel;
+    TextView versionNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+        versionNumber=findViewById(R.id.versionNumber);
 
         sharedPreferences = getSharedPreferences(AppConstants.SHAREDPREF_KEY, Context.MODE_PRIVATE);
-
+        versionNumber.setText("App Verion: "+AppConstants.APP_VERSION);
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
         goIn();
