@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MOH Data Update Tool</string>
+    <string name="app_name">MOH iHRIS Update Tool</string>
     <string name="community_health_worker">Community Health Worker</string>
     <string name="ministry_health_worker">Ministry Health Worker</string>
     <string name="district_label">District</string>

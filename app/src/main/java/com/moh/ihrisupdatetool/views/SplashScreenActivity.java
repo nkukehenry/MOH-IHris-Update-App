@@ -33,7 +33,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         versionNumber=findViewById(R.id.versionNumber);
 
         sharedPreferences = getSharedPreferences(AppConstants.SHAREDPREF_KEY, Context.MODE_PRIVATE);
-        versionNumber.setText("App Verion: "+AppConstants.APP_VERSION);
+        versionNumber.setText("App Version: "+AppConstants.APP_VERSION);
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
         goIn();
